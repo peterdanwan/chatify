@@ -6,7 +6,10 @@
   "scripts": {
     "backend-dev": "node ./backend/src/server.js",
     "prepare": "husky",
-    "lint": "eslint --config eslint.config.js"
+    "lint": "eslint --config eslint.config.js",
+    "format": "prettier --write \"./backend/src/**/*.js\" && prettier --write \"./backend/src/**/*.js\"",
+    "build": "npm i -C backend && npm i -C frontend && npm run build -C frontend",
+    "start": "npm run start -C backend"
   },
   "keywords": [],
   "author": "Peter Wan",
