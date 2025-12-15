@@ -5,14 +5,18 @@ import stoppable from 'stoppable';
 
 import '#config/dotEnv.js';
 import logger from '#config/logger.js';
-import authRouter from '#routes/api/auth.route.js';
+import authRoutes from '#routes/api/auth.route.js';
+import messageRoutes from '#routes/api/message.route.js';
 
 const serverLog = logger.child({ module: 'server.js' });
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use('/api/auth', authRouter);
+// Middleware
+
+app.use('/api/auth', authRoutes);
+app.use('/api/messages', messageRoutes);
 
 const server = stoppable(
   app.listen(PORT, () => {
