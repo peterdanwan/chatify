@@ -3,6 +3,8 @@
 import express from 'express';
 import stoppable from 'stoppable';
 
+// Check error
+
 import '#config/dotEnv.js';
 import logger from '#config/logger.js';
 import authRouter from '#routes/api/auth/index.js';
