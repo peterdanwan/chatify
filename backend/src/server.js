@@ -4,7 +4,7 @@ import express from 'express';
 import stoppable from 'stoppable';
 
 import '#config/dotEnv.js';
-import logger from '#config/logger.js';
+import { logger, shutDownLogger } from '#config/logger.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
 
@@ -24,27 +24,28 @@ const server = stoppable(
   })
 );
 
-export default server;
-
 // // Graceful shutdown handlers
-// const gracefulShutdown = (signal) => {
-//   console.log();
-//   serverLog.info(`${signal} received. Starting graceful shutdown...`);
+const gracefulShutdown = (signal) => {
+  // Create a synchronous logger to flush out stdout
 
-//   if (server) {
-//     server.stop((err) => {
-//       if (err) {
-//         serverLog.error('Error during shutdown:', err);
-//         process.exit(1);
-//       }
-//       serverLog.info('Server stopped gracefully');
-//       process.exit(0);
-//     });
-//   } else {
-//     process.exit(0);
-//   }
-// };
+  shutDownLogger.info(`${signal} received. Starting graceful shutdown...`);
+
+  if (server) {
+    server.stop((err) => {
+      if (err) {
+        shutDownLogger.error('Error during shutdown:', err);
+        process.exit(1);
+      }
+      shutDownLogger.info('Server stopped gracefully');
+      process.exit(0);
+    });
+  } else {
+    process.exit(0);
+  }
+};
 
 // // Listen for termination signals
-// process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-// process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+export default server;

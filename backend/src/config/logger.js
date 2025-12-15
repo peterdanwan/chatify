@@ -8,6 +8,7 @@
 // 1. https://github.com/pinojs/pino
 // 2. https://github.com/pinojs/pino/blob/main/docs/api.md#options
 // 3. https://github.com/pinojs/pino-pretty
+// 4. https://github.com/pinojs/pino/blob/main/docs/asynchronous.md
 
 import pino from 'pino';
 
@@ -26,4 +27,11 @@ if (options.level === 'debug') {
 }
 
 // Export our configured pino logger
-export default pino(options);
+export const logger = pino(options);
+
+// Create a synchronous logger specifically for shutdown scenarios
+export const shutDownLogger = pino({
+  ...pino.destination({
+    sync: true,
+  }),
+});
