@@ -5,8 +5,10 @@ import stoppable from 'stoppable';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import '#config/dotEnv.js';
+import '#config/dotEnv.js'; // Important this is run first here before all other imports.
+
 import { logger, shutDownLogger } from '#config/logger.js';
+import { connectDB } from './lib/db.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
 
@@ -40,11 +42,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Setting up our server
-const server = stoppable(
-  app.listen(PORT, () => {
-    serverLog.info(`Server listening on port: ${PORT}`);
-  })
-);
+let server;
+
+connectDB().then(() => {
+  server = stoppable(
+    app.listen(PORT, () => {
+      serverLog.info(`Server listening on port: ${PORT}`);
+    })
+  );
+});
 
 // Graceful shutdown handlers
 const gracefulShutdown = (signal) => {
