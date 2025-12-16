@@ -21,11 +21,19 @@ const __dirname = path.dirname(__filename);
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
+// In production, serve frontend from within our backend server
 if (process.env.NODE_ENV === 'production') {
+  // Express uses the dist folder for static assets
+  // - no server-side processing => faster loading
+  // - faster loading achieved through => browser caching and CDNs, which lowers server load
+  // - served directly from the server to the browser
   app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
-  // Express v4: app.get('*', (req, res) => ...)
-  // Express v5 ref: https://github.com/expressjs/express/issues/5936#issuecomment-2340677058
+  // Handling Requests with the "wildcard route handler"
+  // - Express v4: app.get('*', (req, res) => ...)
+  // - Express v5 ref: https://github.com/expressjs/express/issues/5936#issuecomment-2340677058
+  // All other requests not handled by our middleware routes above go to this route.
+  // We direct users to the index.html page when they try to visit other routes.
   app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend', '/dist', 'index.html'));
   });
