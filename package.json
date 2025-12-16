@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "backend-dev": "node ./backend/src/server.js",
+    "dev": "npm run dev -C backend",
     "prepare": "husky",
     "lint": "npm run lint -C backend && npm run lint -C frontend",
     "format": "npm run format -C backend && npm run format -C frontend",
-    "build": "npm i -C backend && npm i -C frontend && npm run build -C frontend",
+    "build": "npm i && npm i -C backend && npm i -C frontend && npm run build -C frontend",
     "start": "npm run start -C backend"
   },
   "keywords": [],
@@ -28,10 +28,10 @@
       "npm run format -C backend",
       "npm run lint -C backend"
     ],
-    "frontend/src/**/*.{js,html,css}": [
+    "frontend/src/**/*.{js,jsx,html,css}": [
       "npm run format -C frontend"
     ],
-    "frontend/src/**/*.js": [
+    "frontend/src/**/*.{js,jsx}": [
       "npm run lint -C frontend"
     ]
   }
