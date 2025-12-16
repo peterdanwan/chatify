@@ -30,8 +30,9 @@ if (options.level === 'debug') {
 export const logger = pino(options);
 
 // Create a synchronous logger specifically for shutdown scenarios
-export const shutDownLogger = pino({
-  ...pino.destination({
+export const shutDownLogger = pino(
+  { level: options.level },
+  pino.destination({
     sync: true,
-  }),
-});
+  })
+);
