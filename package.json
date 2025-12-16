@@ -28,7 +28,7 @@
       "npm run format -C backend",
       "npm run lint -C backend"
     ],
-    "frontend/src/**/*.{js,html.css}": [
+    "frontend/src/**/*.{js,html,css}": [
       "npm run format -C frontend"
     ],
     "frontend/src/**/*.js": [
