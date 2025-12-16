@@ -19,7 +19,10 @@
     "#routes/*": "./src/routes/*"
   },
   "lint-staged": {
-    "src/**/*.js": ["prettier --write", "eslint --config eslint.config.js"]
+    "src/**/*.js": [
+      "prettier --write",
+      "eslint --config eslint.config.js"
+    ]
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
