@@ -6,7 +6,7 @@
   "scripts": {
     "backend-dev": "node ./backend/src/server.js",
     "prepare": "husky",
-    "lint": "eslint --config eslint.config.js",
+    "lint": "eslint backend/src --config backend/eslint.config.js && eslint frontend/src --config frontend/eslint.config.js",
     "format": "prettier --write \"./backend/src/**/*.js\" && prettier --write \"./backend/src/**/*.js\"",
     "build": "npm i -C backend && npm i -C frontend && npm run build -C frontend",
     "start": "npm run start -C backend"
@@ -29,8 +29,8 @@
     "prettier": "^3.7.4"
   },
   "lint-staged": {
-    "backend/src/**/*.js": ["prettier --write", "eslint --config eslint.config.js"],
-    "frontend/src/**/*.{js,html.css}": ["prettier --write", "eslint --config eslint.config.js"],
-    "frontend/src/**/*.js": ["prettier --write", "eslint --config eslint.config.js"]
+    "backend/src/**/*.js": ["prettier --write", "eslint --config backend/eslint.config.js"],
+    "frontend/src/**/*.{js,html.css}": ["prettier --write", "eslint --config frontend/eslint.config.js"],
+    "frontend/src/**/*.js": ["prettier --write", "eslint --config frontend/eslint.config.js"]
   }
 }
