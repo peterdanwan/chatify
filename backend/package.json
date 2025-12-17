@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon ./src/server.js",
-    "pdev": "nodemon ./src/server.js | npx pino-pretty",
+    "sdev": "nodemon -q ./src/server.js",
     "format": "prettier --write \"./src/**/*.js\"",
     "lint": "eslint --config eslint.config.js"
   },
