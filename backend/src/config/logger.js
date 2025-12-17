@@ -27,7 +27,7 @@ if (options.level === 'debug') {
 }
 
 // Export our configured pino logger
-export const logger = pino(options);
+export const parentLogger = pino(options);
 
 // Create a synchronous logger specifically for shutdown scenarios
 export const shutDownLogger = pino(
