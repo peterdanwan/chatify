@@ -1,7 +1,7 @@
 // backend/routes/api/auth/index.js
 
 import express from 'express';
-import { getSignup, getLogin, getLogout } from '#controllers/authController.js';
+import { getSignup, getLogin, getLogout } from '#controllers/auth.controller.js';
 
 const authRouter = express.Router();
 
