@@ -17,7 +17,8 @@
     "#controllers/*": "./src/controllers/*",
     "#config/*": "./src/config/*",
     "#routes/*": "./src/routes/*",
-    "#lib/*": "./src/lib/*"
+    "#lib/*": "./src/lib/*",
+    "#models/*": "./src/models/*"
   },
   "lint-staged": {
     "src/**/*.js": [
