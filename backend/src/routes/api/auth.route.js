@@ -1,13 +1,12 @@
-// backend/routes/api/auth/index.js
+// backend/src/routes/api/auth.route.js
 
 import express from 'express';
-import { getSignup, getLogin, getLogout } from '#controllers/auth.controller.js';
+import { signup, login, logout } from '#controllers/auth.controller.js';
 
 const authRouter = express.Router();
 
-authRouter.get('/signup', getSignup);
-// authRouter.get('/deleteaccount', get)
-authRouter.get('/login', getLogin);
-authRouter.get('/logout', getLogout);
+authRouter.post('/signup', signup);
+authRouter.post('/login', login);
+authRouter.post('/logout', logout);
 
 export default authRouter;
