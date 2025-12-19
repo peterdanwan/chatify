@@ -5,8 +5,9 @@ import { parentLogger } from '#config/logger.js';
 
 const log = parentLogger.child({ module: 'utils.js' });
 
-// This response will be sent back as a response in the cookies to the client
+// Generate a JWT and send it back as a cookie within the response sent to the client
 export const generateToken = (userId, res) => {
+  log.info('Generating a token...');
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
   res.cookie('jwt', token, {
@@ -16,6 +17,6 @@ export const generateToken = (userId, res) => {
     secure: process.env.NODE_ENV === 'development' ? false : true,
   });
 
-  log.debug('Generated token.');
+  log.info('Generated token.');
   return token;
 };
