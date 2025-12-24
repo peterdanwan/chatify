@@ -1,4 +1,4 @@
-// backend/server.js
+// backend/src/server.js
 
 /* Import External Libraries */
 import express from 'express';

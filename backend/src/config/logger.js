@@ -1,4 +1,4 @@
-// backend/config/logger.js
+// backend/src/config/logger.js
 
 // Refs:
 // 0a. https://betterstack.com/community/guides/logging/logging-framework/

@@ -1,4 +1,4 @@
-// backend/config/dotEnv.js
+// backend/src/config/dotEnv.js
 
 import dotenv from 'dotenv';
 
