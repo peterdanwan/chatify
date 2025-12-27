@@ -12,6 +12,7 @@ import '#config/dotEnv.js';
 /* Import our custom modules */
 import { parentLogger, shutDownLogger } from '#config/logger.js';
 import { connectDB } from '#lib/db.js';
+import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
 
@@ -28,6 +29,11 @@ const PORT = process.env.PORT || 5001;
 
 /* Middleware */
 app.use(express.json()); // Lets each route parse the body a request and access it through req.body
+
+/* Health check endpoint - BEFORE other routes so it's always accessible */
+app.use('/health', healthCheckRoute);
+
+/* API Routes */
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
