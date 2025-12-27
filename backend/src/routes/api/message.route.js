@@ -2,10 +2,10 @@
 
 import express from 'express';
 
-const messageRouter = express.Router();
+const router = express.Router();
 
-messageRouter.get('/send', (req, res) => {
+router.get('/send', (req, res) => {
   res.send;
 });
 
-export default messageRouter;
+export default router;
