@@ -13,7 +13,7 @@
     "docker:build": "docker build -f Dockerfile -t chatify .",
     "docker:build:dev": "docker build -f Dockerfile.dev -t chatify-dev .",
     "docker:run": "docker run -d --name chatify -p 3000:3000 --env-file .env.docker.production chatify",
-    "docker:run:dev": "docker run -d --name chatify-dev -p 3000:3000 --env-file .env.docker.production chatify-dev",
+    "docker:run:dev": "docker run -d --name chatify-dev -p 3000:3000 --env-file .env.docker.development chatify-dev",
     "docker:stop": "docker stop chatify",
     "docker:stop:dev": "docker stop chatify-dev",
     "docker:start": "docker start chatify",
@@ -35,7 +35,11 @@
     "docker:compose-up": "docker-compose up",
     "docker:compose-down": "docker-compose down",
     "docker:ps": "docker ps",
-    "docker:images": "docker images"
+    "docker:images": "docker images",
+    "mongo:start": "docker run --name mongodb -p 27017:27017 -d mongodb/mongodb-community-server:8.0-ubi8",
+    "mongo:stop": "docker stop mongodb",
+    "mongo:remove": "docker rm mongodb",
+    "mongo:clean": "docker stop mongodb && docker rm mongodb"
   },
   "keywords": [],
   "author": "Peter Wan",
