@@ -58,13 +58,18 @@ if (process.env.NODE_ENV === 'production') {
 /* Setting up our server */
 let server;
 
-connectDB().then(() => {
-  server = stoppable(
-    app.listen(PORT, () => {
-      log.info(`Server listening on port: ${PORT}`);
-    })
-  );
-});
+connectDB()
+  .then(() => {
+    server = stoppable(
+      app.listen(PORT, () => {
+        log.info(`Server listening on port: ${PORT}`);
+      })
+    );
+  })
+  .catch((error) => {
+    log.error(error, 'Error connecting to MongoDB');
+    process.exit(1); // 1 status code means fail, 0 means success
+  });
 
 /* Graceful shutdown handlers */
 const gracefulShutdown = (signal) => {
