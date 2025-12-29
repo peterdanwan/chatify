@@ -1,17 +1,26 @@
 // backend/src/lib/db.js
 
 import mongoose from 'mongoose';
-import { logger } from '#config/logger.js';
+import { parentLogger } from '#config/logger.js';
 
-const dbLogger = logger.child({ module: 'db.js' });
+const log = parentLogger.child({ module: 'db.js' });
+const { USE_LOCAL_DB, MONGO_DB_LOCAL_URI, MONGO_DB_URI } = process.env;
 
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_DB_URI);
-    // Must you string interpolation for dbLogger.info() i.e., not dbLogger.info("text: ", string);
-    dbLogger.info(`Connected to MongoDB successfully: ${conn.connection.host}`);
+    const isLocal = USE_LOCAL_DB === 'true';
+    const mongoURI = isLocal ? MONGO_DB_LOCAL_URI : MONGO_DB_URI;
+    log.info(`Connecting to MongoDB ${isLocal ? 'locally' : 'on the cloud'}`);
+
+    if (!mongoURI) {
+      throw new Error('"mongoURI" is not defined. Check your MONGO_DB_LOCAL_URI or MONGO_DB_URI');
+    }
+
+    const conn = await mongoose.connect(mongoURI);
+    // Must use string interpolation for dbLogger.info() i.e., not dbLogger.info("text: ", string);
+    log.info(`Connected to MongoDB successfully: ${conn.connection.host}`);
   } catch (error) {
-    dbLogger.error('Error connecting to MongoDB', error);
+    log.error(error, 'Error connecting to MongoDB.');
     process.exit(1); // 1 status code means fail, 0 means success
   }
 };

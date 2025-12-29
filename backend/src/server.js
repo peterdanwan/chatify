@@ -1,29 +1,43 @@
-// backend/server.js
+// backend/src/server.js
 
+/* Import External Libraries */
 import express from 'express';
 import stoppable from 'stoppable';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import '#config/dotEnv.js'; // Important this is run first here before all other imports.
+/* Run dotEnv config before all other files that require env variables */
+import '#config/dotEnv.js';
 
-import { logger, shutDownLogger } from '#config/logger.js';
+/* Import our custom modules */
+import { parentLogger, shutDownLogger } from '#config/logger.js';
 import { connectDB } from '#lib/db.js';
+import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
 
-const serverLog = logger.child({ module: 'server.js' });
-const app = express();
-const PORT = process.env.PORT || 5001;
+/* Create a child instance of our structured logger */
+const log = parentLogger.child({ module: 'server.js' });
 
+/* ES6 way of extracting the __dirname of this file */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middleware
+/* Create our express app */
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+/* Middleware */
+app.use(express.json()); // Lets each route parse the body a request and access it through req.body
+
+/* Health check endpoint - BEFORE other routes so it's always accessible */
+app.use('/health', healthCheckRoute);
+
+/* API Routes */
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
-// In production, serve frontend from within our backend server
+/* In production, serve frontend from within our backend server */
 if (process.env.NODE_ENV === 'production') {
   // Express uses the dist folder for static assets
   // - no server-side processing => faster loading
@@ -41,18 +55,18 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Setting up our server
+/* Setting up our server */
 let server;
 
 connectDB().then(() => {
   server = stoppable(
     app.listen(PORT, () => {
-      serverLog.info(`Server listening on port: ${PORT}`);
+      log.info(`Server listening on port: ${PORT}`);
     })
   );
 });
 
-// Graceful shutdown handlers
+/* Graceful shutdown handlers */
 const gracefulShutdown = (signal) => {
   shutDownLogger.info(`${signal} received. Starting graceful shutdown...`);
 
@@ -70,7 +84,7 @@ const gracefulShutdown = (signal) => {
   }
 };
 
-// Listen for termination signals
+/* Listen for termination signals */
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 

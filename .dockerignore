@@ -1,0 +1,76 @@
+# ============================================
+# .dockerignore
+# Excludes files from Docker build context
+# This speeds up builds and keeps secrets safe!
+# ============================================
+
+# Node modules at ANY level
+**/node_modules
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+**/.npm
+**/.yarn
+
+# Environment files - NEVER include these in images!
+**/.env
+**/.env.*
+backend/.env
+frontend/.env
+.env.docker.*
+**/*.env
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# IDE
+**/.vscode
+**/.idea
+**/*.swp
+**/*.swo
+**/*~
+**/.DS_Store
+
+# Testing
+**/coverage
+**/.nyc_output
+**/*.test.js
+**/*.spec.js
+**/__tests__
+**/__mocks__
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+docs
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+
+# Build outputs (we'll create fresh in Docker)
+**/dist
+**/build
+**/*.log
+
+# Other
+**/.husky
+**/.prettierrc*
+**/.eslintrc*
+**/eslint.config.js
+**/.editorconfig
+**/.eslintcache
+**/_notes
+**/_test
