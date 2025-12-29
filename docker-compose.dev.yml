@@ -1,0 +1,85 @@
+# ====================================================================
+# docker-compose.dev.yml (Development)
+# Runs with nodemon for hot-reloading and includes local MongoDB
+# ====================================================================
+
+services:
+  # MongoDB Service (Local Development Database)
+  # Ref: https://www.mongodb.com/resources/products/compatibilities/docker
+  mongodb:
+    image: mongo:8.0-ubi8
+    container_name: chatify-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"  # Expose MongoDB to host machine
+    environment:
+      # MongoDB root credentials (from env file)
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      # Persist MongoDB data (survives container restarts)
+      - mongodb_data:/data/db
+      # Persist MongoDB config
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - chatify-dev-network
+
+  # Application Service
+  chatify-dev:
+    image: chatify-dev:latest
+    container_name: chatify-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      cache_from:
+        - chatify-dev:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      # MongoDB connection string (uses service name 'mongodb' as hostname)
+      - MONGO_DB_URI=${MONGO_DB_URI}
+    env_file:
+      - .env.docker.development
+    volumes:
+      # Mount source code for live reloading with nodemon
+      - ./backend/src:/app/backend/src:ro
+      # Prevent overwriting node_modules
+      - /app/backend/node_modules
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    networks:
+      - chatify-dev-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Named volumes for data persistence
+volumes:
+  mongodb_data:
+    name: chatify-mongodb-data-dev
+  mongodb_config:
+    name: chatify-mongodb-config-dev
+
+# Network for service communication
+networks:
+  chatify-dev-network:
+    name: chatify-dev-network
+    driver: bridge
