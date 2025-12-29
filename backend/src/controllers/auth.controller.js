@@ -15,13 +15,18 @@ export const signup = async (req, res) => {
 
   const { firstName, lastName, email, password } = req.body;
 
+  const normalizedFirstName = typeof firstName === 'string' ? firstName.trim() : '';
+  const normalizedLastName = typeof lastName === 'string' ? lastName.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const normalizedPassword = typeof password === 'string' ? password : '';
+
   try {
-    if (!firstName || !lastName || !email || !password) {
+    if (!normalizedFirstName || !normalizedLastName || !normalizedEmail || !normalizedPassword) {
       log.debug('Some signup info is missing.');
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    if (password.length < 6) {
+    if (normalizedPassword.length < 6) {
       log.debug('User password is too short');
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
@@ -29,7 +34,7 @@ export const signup = async (req, res) => {
     // Check if email is valid: regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       log.debug('User sent in an invalid email.');
       return res.status(400).json({ message: 'Invalid email format' });
     }
@@ -37,29 +42,30 @@ export const signup = async (req, res) => {
     // Check if the user exists by checking for the same email in our database.
     // Ref: https://mongoosejs.com/docs/models.html
     // Ref: https://mongoosejs.com/docs/api/model.html#Model.findOne()
-    const user = await User.findOne({ email }).exec();
+    const existingUser = await User.findOne({ normalizedEmail }).exec();
 
-    // Check if the user already exists
-    if (user) {
+    if (existingUser) {
       log.info('Cannot sign up: user with email already exists.');
       return res.status(400).json({ message: 'Account with this email already exists.' });
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(normalizedPassword, salt);
 
     // Proceed with creating a user
     const newUser = new User({
-      firstName,
-      lastName,
-      email,
+      firstName: normalizedFirstName,
+      lastName: normalizedLastName,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
     if (newUser) {
-      generateToken(newUser._id, res);
+      // Save our new user before generating a token so we don't make a token for a non-persisted user.
       await newUser.save();
-      log.info(`New user: "${firstName} ${lastName}" sucessfully created.`);
+      generateToken(newUser._id, res);
+
+      log.info(`New user: "${normalizedFirstName} ${normalizedLastName}" sucessfully created.`);
 
       return res.status(201).json({
         _id: newUser._id,
@@ -73,6 +79,12 @@ export const signup = async (req, res) => {
     }
   } catch (error) {
     log.error(error, 'Error with signup controller:');
+
+    // Handle race-condition: unique email constraint violation
+    if (error?.code === 11000 && (error.keyPattern?.email || error.keyValue?.email)) {
+      return res.status(409).json({ message: 'Email already exists' });
+    }
+
     res.status(500).json({ message: 'Internal server error' });
   }
 
