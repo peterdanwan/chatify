@@ -13,13 +13,17 @@ export const generateToken = (userId, res) => {
     throw new Error('JWT_SECRET is not configured');
   }
 
+  if (!NODE_ENV) {
+    throw new Error('NODE_ENV is not configured');
+  }
+
   const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 
   res.cookie('jwt', token, {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     httpOnly: true, // prevent XSS attacks (can't access this token via JS): cross-site scripting
     sameSite: 'strict', // prevent CSRF attacks
-    secure: NODE_ENV === 'development' ? false : true,
+    secure: NODE_ENV !== 'development',
   });
 
   log.info('Generated token.');
