@@ -66,6 +66,7 @@ connectDB()
       })
     );
   })
+  // Better to "catch" the error at the top-most level where we call connectDB(), rather than within connectDB() itself.
   .catch((error) => {
     log.error(error, 'Error connecting to MongoDB');
     process.exit(1); // 1 status code means fail, 0 means success
