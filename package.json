@@ -36,10 +36,10 @@
     "docker:compose-down": "docker-compose down",
     "docker:ps": "docker ps",
     "docker:images": "docker images",
-    "mongo:start": "docker run --name mongodb -p 27017:27017 -d mongodb/mongodb-community-server:8.0-ubi8",
-    "mongo:stop": "docker stop mongodb",
-    "mongo:remove": "docker rm mongodb",
-    "mongo:clean": "docker stop mongodb && docker rm mongodb"
+    "mongo:start": "docker run --name mongodb-chatify -p 27017:27017 --env-file .env.docker.development.mongo mongodb/mongodb-community-server:8.0-ubi8",
+    "mongo:stop": "docker stop mongodb-chatify",
+    "mongo:rm": "docker rm mongodb-chatify",
+    "mongo:clean": "docker stop mongodb-chatify && docker rm mongodb-chatify"
   },
   "keywords": [],
   "author": "Peter Wan",
