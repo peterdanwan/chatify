@@ -6,17 +6,20 @@
 services:
   # MongoDB Service (Local Development Database)
   # Ref: https://www.mongodb.com/resources/products/compatibilities/docker
-  mongodb:
-    image: mongo:8.0-ubi8
+  chatify-mongodb:
+    image: mongodb/mongodb-community-server:8.0-ubi8 
     container_name: chatify-mongodb-dev
     restart: unless-stopped
     ports:
       - "27017:27017"  # Expose MongoDB to host machine
-    environment:
-      # MongoDB root credentials (from env file)
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    # environment:
+    #   # MongoDB root credentials (from env file) (these specific environment variables mean something to the MongoDB image)
+    #   MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+    #   MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    #   MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    env_file:
+      # Loads the MongoDB credentials above, but from the env file
+      - .env.docker.development
     volumes:
       # Persist MongoDB data (survives container restarts)
       - mongodb_data:/data/db
@@ -42,10 +45,10 @@ services:
         - chatify-dev:latest
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=development
+    # environment:
+      # - NODE_ENV=development
       # MongoDB connection string (uses service name 'mongodb' as hostname)
-      - MONGO_DB_URI=${MONGO_DB_URI}
+      # - MONGO_DB_URI=${MONGO_DB_URI}
     env_file:
       - .env.docker.development
     volumes:
@@ -55,7 +58,7 @@ services:
       - /app/backend/node_modules
     restart: unless-stopped
     depends_on:
-      mongodb:
+      chatify-mongodb:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
