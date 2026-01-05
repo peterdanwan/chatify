@@ -6,7 +6,7 @@
 # ============================================
 # Stage 1: Build Frontend
 # ============================================
-FROM node:24.11.1-alpine AS frontend-build
+FROM node:24.12.1-alpine AS frontend-build
 WORKDIR /app/frontend
 
 # Copy frontend folder's package files
@@ -28,7 +28,7 @@ RUN npm run build
 # ============================================
 # Stage 2: Backend Production Dependencies
 # ============================================
-FROM node:24.11.1-alpine AS backend-prod-deps
+FROM node:24.12.1-alpine AS backend-prod-deps
 WORKDIR /app
 
 # Copy our backend folder's package files
@@ -44,7 +44,7 @@ RUN npm ci --omit=dev
 # ============================================
 # Stage 3: Production - Final Image
 # ============================================
-FROM node:24.11.1-alpine AS production
+FROM node:24.12.0-alpine AS production
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
