@@ -12,6 +12,8 @@
 
 import pino from 'pino';
 
+const { NODE_ENV, LOG_LEVEL } = process.env;
+
 function createPinoLogger(options, usePretty = false) {
   if (usePretty) {
     const prettyOptions = {
@@ -24,7 +26,9 @@ function createPinoLogger(options, usePretty = false) {
 
     try {
       const logger = pino(prettyOptions);
-      logger.child({ module: 'logger.js' }).debug('Logging using pino-pretty');
+      logger
+        .child({ module: 'logger.js' })
+        .info(`Logging using pino-pretty with log level set to "${LOG_LEVEL}"`);
 
       return logger;
     } catch (error) {
@@ -32,7 +36,7 @@ function createPinoLogger(options, usePretty = false) {
       const child = fallbackLogger.child({ module: 'logger.js' });
       child.warn(
         error,
-        "'pino-pretty' was not installed properly. Logging using the default pino logger"
+        `'pino-pretty' was not installed properly. Logging using the default pino logger with log level set to "${LOG_LEVEL}"`
       );
 
       return fallbackLogger;
@@ -40,17 +44,17 @@ function createPinoLogger(options, usePretty = false) {
   }
   const logger = pino(options);
   const child = logger.child({ module: 'logger.js' });
-  child.debug('Logging using the default pino logger');
+  child.info(`Logging using the default pino logger with log level set to "${LOG_LEVEL}"`);
 
   return logger;
 }
 
-const options = { level: process.env.LOG_LEVEL || 'info' };
+const options = { level: LOG_LEVEL || 'info' };
 
 // In development, while we are debugging by ourselves, we will use
 // the 'pino-pretty' devDependency to format our logs.
 // Otherwise, we want the raw JSON from pino to be sent to other services to be processed.
-const shouldUsePretty = process.env.NODE_ENV === 'development' && options.level === 'debug';
+const shouldUsePretty = NODE_ENV === 'development' && options.level === 'debug';
 
 // Export our configured pino logger
 // Note: if pino-pretty isn't installed (e.g., in Production and the env file is not set up correctly) it can throw an error.
