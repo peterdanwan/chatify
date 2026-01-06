@@ -54,6 +54,8 @@ services:
     volumes:
       # Mount source code for live reloading with nodemon
       - ./backend/src:/app/backend/src:ro
+      # Mount package.json so import maps are always current
+      - ./backend/package.json:/app/backend/package.json:ro
       # Prevent overwriting node_modules
       - /app/backend/node_modules
     restart: unless-stopped
