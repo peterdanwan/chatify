@@ -8,7 +8,6 @@ const log = parentLogger.child({ module: 'resend.js' });
 const { EMAIL_FROM, EMAIL_FROM_FIRST_NAME, EMAIL_FROM_LAST_NAME, RESEND_API_KEY } = process.env;
 
 // Ref: https://resend.com/docs/send-with-nodejs#2-send-email-using-html
-// TODO: compare official documentation with custom code.
 
 // We send emails with the resendClient
 export const resendClient = new Resend(RESEND_API_KEY);

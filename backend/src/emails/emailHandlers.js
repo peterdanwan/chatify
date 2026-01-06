@@ -7,6 +7,7 @@ import { createWelcomeEmailTemplate } from '#emails/emailTemplates.js';
 const log = parentLogger.child({ module: 'emailHandler.js' });
 
 export const sendWelcomeEmail = async (email, name, clientURL) => {
+  // Ref: https://resend.com/docs/send-with-nodejs#2-send-email-using-html
   const { data, error } = await resendClient.emails.send({
     from: `${sender.name} <${sender.email}>`,
     to: email,
