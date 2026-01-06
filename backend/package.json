@@ -18,7 +18,8 @@
     "#config/*": "./src/config/*",
     "#routes/*": "./src/routes/*",
     "#lib/*": "./src/lib/*",
-    "#models/*": "./src/models/*"
+    "#models/*": "./src/models/*",
+    "#emails/*": "./src/emails/*"
   },
   "lint-staged": {
     "src/**/*.js": [
