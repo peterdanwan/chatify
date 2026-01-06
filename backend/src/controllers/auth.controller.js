@@ -4,6 +4,7 @@ import { parentLogger } from '#config/logger.js';
 import { User } from '#models/User.js';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '#lib/utils.js';
+import { sendWelcomeEmail } from '#emails/emailHandlers.js';
 
 const log = parentLogger.child({ module: 'auth.controller.js' });
 
@@ -61,18 +62,30 @@ export const signup = async (req, res) => {
     });
 
     if (newUser) {
+      log.debug('Attempting to save new user to the database');
+
       // Save our new user before generating a token so we don't make a token for a non-persisted user.
-      await newUser.save();
-      generateToken(newUser._id, res);
+      // The code below can throw an error (e.g., if there's a signup duplicate).
+      const savedUser = await newUser.save();
 
-      log.info(`New user: "${normalizedFirstName} ${normalizedLastName}" sucessfully created.`);
+      log.debug('Saved the new user to the database');
+      generateToken(savedUser._id, res);
 
-      return res.status(201).json({
-        _id: newUser._id,
-        fullName: `${newUser.firstName} ${newUser.lastName}`,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
+      const fullName = `${savedUser.firstName} ${savedUser.lastName}`;
+      log.info(`New user: "${fullName}" sucessfully created.`);
+
+      res.status(201).json({
+        _id: savedUser._id,
+        fullName,
+        email: savedUser.email,
+        profilePic: savedUser.profilePic,
       });
+
+      try {
+        await sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL);
+      } catch (error) {
+        log.error(error, 'Error with sending welcome email:');
+      }
     } else {
       log.info('Could not create a new user.');
       res.status(400).json({ message: 'Invalid user data.' });
@@ -87,8 +100,6 @@ export const signup = async (req, res) => {
 
     res.status(500).json({ message: 'Internal server error' });
   }
-
-  res.send('Signup endpoint');
 };
 
 export const login = async (req, res) => {
