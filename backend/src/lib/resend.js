@@ -1,6 +1,5 @@
 // backend/src/lib/resend.js
 
-import '#config/dotEnv.js'; // might not be necessary to import here.
 import { Resend } from 'resend';
 import { parentLogger } from '#config/logger.js';
 
