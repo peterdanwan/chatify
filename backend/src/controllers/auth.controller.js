@@ -3,7 +3,7 @@
 import { parentLogger } from '#config/logger.js';
 import { User } from '#models/User.js';
 import bcrypt from 'bcryptjs';
-import { generateToken } from '#lib/utils.js';
+import { generateToken, clearToken } from '#lib/utils.js';
 import { sendWelcomeEmail } from '#emails/emailHandlers.js';
 
 const log = parentLogger.child({ module: 'auth.controller.js' });
@@ -43,7 +43,7 @@ export const signup = async (req, res) => {
     // Check if the user exists by checking for the same email in our database.
     // Ref: https://mongoosejs.com/docs/models.html
     // Ref: https://mongoosejs.com/docs/api/model.html#Model.findOne()
-    const existingUser = await User.findOne({ normalizedEmail }).exec();
+    const existingUser = await User.findOne({ email: normalizedEmail }).exec();
 
     if (existingUser) {
       log.info('Cannot sign up: user with email already exists.');
@@ -126,4 +126,46 @@ export const logout = (req, res) => {
   log.info('Logout endpoint reached');
 
   res.send('Logout endpoint');
+};
+
+export const deleteUser = async (req, res) => {
+  log.info('Delete user endpoint reached');
+
+  const { email, password } = req.body;
+
+  // Validate that the user exists
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const normalizedPassword = typeof password === 'string' ? password : '';
+
+  // Validate required fields
+  if (!normalizedEmail || !normalizedPassword) {
+    log.info('Email or password missing for user deletion');
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email: normalizedEmail }).exec();
+
+    if (!existingUser) {
+      log.info('Delete attempt: User with email could not be found');
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const passwordMatches = await bcrypt.compare(password, existingUser.password);
+
+    if (!passwordMatches) {
+      log.info('Delete attempt: Password does not match');
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    await User.findByIdAndDelete(existingUser._id);
+    log.info(`User ${existingUser.email} successfully deleted`);
+
+    clearToken(res);
+    log.info('Cleared jwt token, logging out the user');
+
+    return res.status(200).json({ message: 'Account successfully deleted' });
+  } catch (error) {
+    log.error(error, 'Error with delete user controller');
+  }
 };
