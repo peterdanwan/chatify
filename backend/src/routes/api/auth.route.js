@@ -11,7 +11,7 @@ const router = express.Router();
 router.post('/signup', signup);
 router.post('/login', login);
 router.post('/logout', logout);
-router.post('/delete', deleteUser);
+router.delete('/delete', deleteUser);
 
 log.info('Initialized "auth" routes');
 
