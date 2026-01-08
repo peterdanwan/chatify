@@ -8,7 +8,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 // Generate a JWT and send it back as a cookie within the response sent to the client
 export const generateToken = (userId, res) => {
-  log.info('Generating a token...');
+  log.debug('Generating a token...');
   if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not configured');
   }
@@ -26,6 +26,19 @@ export const generateToken = (userId, res) => {
     secure: NODE_ENV !== 'development',
   });
 
-  log.info('Generated token.');
+  log.debug('Generated token.');
   return token;
+};
+
+export const clearToken = (res) => {
+  log.debug('Clearing token (logging out user)');
+
+  res.cookie('jwt', '', {
+    maxAge: 0,
+    httpOnly: true, // prevent XSS attacks (can't access this token via JS): cross-site scripting
+    sameSite: 'strict', // prevent CSRF attacks
+    secure: NODE_ENV !== 'development',
+  });
+
+  log.debug('Cleared token (logged out user)');
 };
