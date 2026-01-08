@@ -141,5 +141,5 @@ vite.config.ts.timestamp-*
 # Notes
 _notes/*
 
-# Test
-_test/
+# Fixtures
+_fixtures/
