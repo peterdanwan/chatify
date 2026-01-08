@@ -45,7 +45,11 @@
     "mongo:logs": "docker logs -f mongodb-chatify-db",
     "mongo:stop": "docker stop mongodb-chatify-db",
     "mongo:rm": "docker rm mongodb-chatify-db",
-    "mongo:clean": "docker stop mongodb-chatify-db && docker rm mongodb-chatify-db"
+    "mongo:clean": "docker stop mongodb-chatify-db && docker rm mongodb-chatify-db",
+    "bash:signup": "bash ./_scripts/bash/signup.sh",
+    "node:signup": "node ./_scripts/node/signup.js",
+    "bash:delete-user": "bash ./_scripts/bash/delete-user.sh",
+    "node:delete-user": "node ./_scripts/node/delete-user.js"
   },
   "keywords": [],
   "author": "Peter Wan",
