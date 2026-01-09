@@ -8,6 +8,23 @@ const log = parentLogger.child({ module: 'emailHandler.js' });
 
 export const sendWelcomeEmail = async (email, name, clientURL) => {
   // Ref: https://resend.com/docs/send-with-nodejs#2-send-email-using-html
+
+  // Error handling
+  if (!sender?.email || !sender?.name) {
+    throw new Error(
+      'Email sender configuration missing (EMAIL_FROM, EMAIL_FROM_FIRST_NAME, EMAIL_FROM_LAST_NAME)'
+    );
+  }
+
+  if (!email) {
+    throw new Error('Recipient email is required');
+  }
+
+  if (!clientURL) {
+    throw new Error('clientURL is required');
+  }
+
+  // Use resend client to send the email
   const { data, error } = await resendClient.emails.send({
     from: `${sender.name} <${sender.email}>`,
     to: email,
