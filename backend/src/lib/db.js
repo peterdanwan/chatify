@@ -14,10 +14,6 @@ export const connectDB = async () => {
   const mongoURI = isLocal ? MONGO_DB_LOCAL_URI : MONGO_DB_URI;
   log.info(`Connecting to MongoDB ${isLocal ? 'locally' : 'on the cloud'}`);
 
-  if (!mongoURI) {
-    throw new Error('"mongoURI" is not defined. Check your MONGO_DB_LOCAL_URI or MONGO_DB_URI');
-  }
-
   const conn = await mongoose.connect(mongoURI);
   // Must use string interpolation for dbLogger.info() i.e., not dbLogger.info("text: ", string);
   log.info(`Connected to MongoDB successfully: ${conn.connection.host}`);
