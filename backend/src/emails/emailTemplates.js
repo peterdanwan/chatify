@@ -1,5 +1,9 @@
 // backend/src/emails/emailTemplates.js
 
+import { parentLogger } from '#config/logger.js';
+
+const log = parentLogger.child({ module: 'emailTemplates.js' });
+
 export function createWelcomeEmailTemplate(name, clientURL) {
   // PW: As an FYI, this is an example of a "Transactional Stream" email.
   // Transactional Stream: For "triggered" emails to one recipient at a time
@@ -12,6 +16,38 @@ export function createWelcomeEmailTemplate(name, clientURL) {
   //    1. Newsletters
   //    2. Product announcements
   //    3. Terms & Conditions
+
+  // Error handling
+  if (!name || typeof name !== 'string') {
+    throw new Error('Valid name is required');
+  }
+
+  if (!clientURL || typeof clientURL !== 'string') {
+    throw new Error('Valid clientURL is required');
+  }
+
+  // URL validation
+  try {
+    new URL(clientURL);
+  } catch (error) {
+    log.error(error, 'Invalid clientURL:');
+    throw new Error(error);
+  }
+
+  // HTML escape function to prevent XSS (i.e., Cross-Site Scripting)
+  // Ref: https://portswigger.net/web-security/cross-site-scripting
+  const escapeHtml = (unsafe) => {
+    return unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
+  const safeName = escapeHtml(name.trim());
+  const safeURL = escapeHtml(clientURL.trim());
+
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -26,7 +62,7 @@ export function createWelcomeEmailTemplate(name, clientURL) {
       <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 500;">Welcome to Chatify!</h1>
     </div>
     <div style="background-color: #ffffff; padding: 35px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-      <p style="font-size: 18px; color: #5B86E5;"><strong>Hello ${name},</strong></p>
+      <p style="font-size: 18px; color: #5B86E5;"><strong>Hello ${safeName},</strong></p>
       <p>We're excited to have you join our messaging platform! Chatify connects you with friends, family, and colleagues in real-time, no matter where they are.</p>
       
       <div style="background-color: #f8f9fa; padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #36D1DC;">
@@ -40,7 +76,7 @@ export function createWelcomeEmailTemplate(name, clientURL) {
       </div>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href=${clientURL} style="background: linear-gradient(to right, #36D1DC, #5B86E5); color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: 500; display: inline-block;">Open Chatify</a>
+        <a href="${safeURL}" style="background: linear-gradient(to right, #36D1DC, #5B86E5); color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: 500; display: inline-block;">Open Chatify</a>
       </div>
       
       <p style="margin-bottom: 5px;">If you need any help or have questions, we're always here to assist you.</p>
