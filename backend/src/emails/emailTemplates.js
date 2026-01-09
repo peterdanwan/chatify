@@ -1,6 +1,17 @@
 // backend/src/emails/emailTemplates.js
 
 export function createWelcomeEmailTemplate(name, clientURL) {
+  // PW: As an FYI, this is an example of a "Transactional Stream" email.
+  // Transactional Stream: For "triggered" emails to one recipient at a time
+  //  - Great for:
+  //    1. Welcome emails (like this!)
+  //    2. Confirmation emails
+  //    3. Password resets
+  // Bulk Stream: For promotional emails to multiple recipients at once
+  //  - Great for:
+  //    1. Newsletters
+  //    2. Product announcements
+  //    3. Terms & Conditions
   return `
   <!DOCTYPE html>
   <html lang="en">
