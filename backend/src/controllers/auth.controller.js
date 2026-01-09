@@ -81,11 +81,10 @@ export const signup = async (req, res) => {
         profilePic: savedUser.profilePic,
       });
 
-      try {
-        await sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL);
-      } catch (error) {
+      // Fire-and-forget; do not delay response based on email latency (i.e., don't use try-catch on this async function)
+      sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL).catch((error) => {
         log.error(error, 'Error with sending welcome email:');
-      }
+      });
     } else {
       log.info('Could not create a new user.');
       res.status(400).json({ message: 'Invalid user data.' });
