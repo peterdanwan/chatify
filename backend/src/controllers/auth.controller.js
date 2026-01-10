@@ -3,8 +3,15 @@
 import { parentLogger } from '#config/logger.js';
 import { User } from '#models/User.js';
 import bcrypt from 'bcryptjs';
-import { generateToken, clearToken } from '#lib/utils.js';
 import { sendWelcomeEmail } from '#emails/emailHandlers.js';
+import {
+  generateToken,
+  clearToken,
+  normalizeInputs,
+  validateEmail,
+  validateSafePassword,
+  allStringsAreNotEmpty,
+} from '#lib/utils.js';
 
 const log = parentLogger.child({ module: 'auth.controller.js' });
 
@@ -14,36 +21,28 @@ const log = parentLogger.child({ module: 'auth.controller.js' });
 export const signup = async (req, res) => {
   log.info('Sign up endpoint reached.');
 
-  const { firstName, lastName, email, password } = req.body;
-
-  const normalizedFirstName = typeof firstName === 'string' ? firstName.trim() : '';
-  const normalizedLastName = typeof lastName === 'string' ? lastName.trim() : '';
-  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-  const normalizedPassword = typeof password === 'string' ? password : '';
+  const { firstName, lastName, email, password } = normalizeInputs(req.body);
 
   try {
-    if (!normalizedFirstName || !normalizedLastName || !normalizedEmail || !normalizedPassword) {
+    if (!allStringsAreNotEmpty(firstName, lastName, email, password)) {
       log.debug('Some signup info is missing.');
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    if (normalizedPassword.length < 6) {
-      log.debug('User password is too short');
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
-    }
-
-    // Check if email is valid: regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(normalizedEmail)) {
+    if (!validateEmail(email)) {
       log.debug('User sent in an invalid email.');
       return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    if (!validateSafePassword(password)) {
+      log.debug('User password is too short');
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
     // Check if the user exists by checking for the same email in our database.
     // Ref: https://mongoosejs.com/docs/models.html
     // Ref: https://mongoosejs.com/docs/api/model.html#Model.findOne()
-    const existingUser = await User.findOne({ email: normalizedEmail }).exec();
+    const existingUser = await User.findOne({ email }).exec();
 
     if (existingUser) {
       log.info('Cannot sign up: user with email already exists.');
@@ -51,13 +50,13 @@ export const signup = async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(normalizedPassword, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Proceed with creating a user
     const newUser = new User({
-      firstName: normalizedFirstName,
-      lastName: normalizedLastName,
-      email: normalizedEmail,
+      firstName,
+      lastName,
+      email,
       password: hashedPassword,
     });
 
@@ -104,67 +103,90 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   log.info('Login endpoint reached');
 
-  const { email, password } = req.body;
+  const { email, password } = normalizeInputs(req.body);
 
   try {
-    // TODO: Ensure email and password aren't blank
-
-    const user = await User.findOne({ email, password });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Cannot find user' });
+    if (!allStringsAreNotEmpty(email, password)) {
+      log.debug('Some login info is missing.');
+      return res.status(400).json({ message: 'All fields are required' });
     }
-  } catch (error) {
-    log.error(error, 'Error with login:');
-  }
 
-  res.send('Login endpoint');
+    if (!validateEmail(email)) {
+      log.debug('User sent in an invalid email.');
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    const loggedInUser = await User.findOne({ email });
+    if (!loggedInUser) {
+      // NOTE: never tell the client what didn't pass (email or password)
+      log.info('Login attempt: Could not find user with this email and password combination');
+      return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
+    }
+
+    const passwordMatches = await bcrypt.compare(password, loggedInUser.password);
+    if (!passwordMatches) {
+      log.info('Login attempt: Password does not match');
+      return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
+    }
+
+    generateToken(loggedInUser._id, res);
+
+    log.info(`"${loggedInUser.firstName} ${loggedInUser.lastName}" sucessfully signed in.`);
+
+    res.status(200).json({
+      _id: loggedInUser._id,
+      fullName: loggedInUser.fullName,
+      email: loggedInUser.email,
+      profilePic: loggedInUser.profilePic,
+    });
+  } catch (error) {
+    log.error(error, 'Error with login controller:');
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
-export const logout = (req, res) => {
+export const logout = (_, res) => {
   log.info('Logout endpoint reached');
 
-  res.send('Logout endpoint');
+  clearToken(res);
+  log.info('Cleared "jwt" token, logging out the user');
+
+  res.status(200).json({ message: 'Logged out successfully' });
 };
 
 export const deleteUser = async (req, res) => {
   log.info('Delete user endpoint reached');
 
-  const { email, password } = req.body;
-
-  // Validate that the user exists
-  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-  const normalizedPassword = typeof password === 'string' ? password : '';
+  const { email, password } = normalizeInputs(req.body);
 
   // Validate required fields
-  if (!normalizedEmail || !normalizedPassword) {
+  if (!allStringsAreNotEmpty(email, password)) {
     log.info('Email or password missing for user deletion');
     return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
-    const existingUser = await User.findOne({ email: normalizedEmail }).exec();
-
+    const existingUser = await User.findOne({ email }).exec();
     if (!existingUser) {
       log.info('Delete attempt: User with email could not be found');
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
     }
 
     const passwordMatches = await bcrypt.compare(password, existingUser.password);
-
     if (!passwordMatches) {
       log.info('Delete attempt: Password does not match');
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
     }
 
     await User.findByIdAndDelete(existingUser._id);
     log.info(`User ${existingUser.email} successfully deleted`);
 
     clearToken(res);
-    log.info('Cleared jwt token, logging out the user');
+    log.info('Cleared "jwt" token, logging out the user');
 
     return res.status(200).json({ message: 'Account successfully deleted' });
   } catch (error) {
-    log.error(error, 'Error with delete user controller');
+    log.error(error, 'Error with deleteUser controller');
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };

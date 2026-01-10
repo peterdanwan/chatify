@@ -22,6 +22,7 @@ export const generateToken = (userId, res) => {
   return token;
 };
 
+// Clear the "jwt" token created from generateToken (stored in the client's browser), effectively logging out the user
 export const clearToken = (res) => {
   log.debug('Clearing token (logging out user)');
 
@@ -33,4 +34,39 @@ export const clearToken = (res) => {
   });
 
   log.debug('Cleared token (logged out user)');
+};
+
+export const normalizeString = (value) => {
+  return typeof value === 'string' ? value.trim() : '';
+};
+
+export const normalizeEmail = (email) => {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
+};
+
+export const normalizePassword = (password) => {
+  return typeof password === 'string' ? password : '';
+};
+
+export const normalizeInputs = (inputs) => {
+  return {
+    firstName: normalizeString(inputs.firstName),
+    lastName: normalizeString(inputs.lastName),
+    email: normalizeEmail(inputs.email),
+    password: normalizePassword(inputs.password),
+  };
+};
+
+export const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return emailRegex.test(email);
+};
+
+export const validateSafePassword = (password) => {
+  return password.length >= 6;
+};
+
+export const allStringsAreNotEmpty = (...values) => {
+  return values.every((value) => typeof value === 'string' && value.length > 0);
 };
