@@ -1,14 +1,11 @@
 // backend/src/lib/utils.js
 
 import jwt from 'jsonwebtoken';
-import { parentLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'utils.js' });
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 // Generate a JWT and send it back as a cookie within the response sent to the client
 export const generateToken = (userId, res) => {
-  log.debug('Generating a token...');
   const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 
   res.cookie('jwt', token, {
@@ -18,22 +15,17 @@ export const generateToken = (userId, res) => {
     secure: NODE_ENV !== 'development',
   });
 
-  log.debug('Generated token.');
   return token;
 };
 
 // Clear the "jwt" token created from generateToken (stored in the client's browser), effectively logging out the user
 export const clearToken = (res) => {
-  log.debug('Clearing token (logging out user)');
-
   res.cookie('jwt', '', {
     maxAge: 0,
     httpOnly: true, // prevent XSS attacks (can't access this token via JS): cross-site scripting
     sameSite: 'strict', // prevent CSRF attacks
     secure: NODE_ENV !== 'development',
   });
-
-  log.debug('Cleared token (logged out user)');
 };
 
 export const normalizeString = (value) => {

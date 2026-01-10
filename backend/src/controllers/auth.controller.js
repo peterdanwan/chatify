@@ -61,14 +61,13 @@ export const signup = async (req, res) => {
     });
 
     if (newUser) {
-      log.debug('Attempting to save new user to the database');
-
       // Save our new user before generating a token so we don't make a token for a non-persisted user.
       // The code below can throw an error (e.g., if there's a signup duplicate).
       const savedUser = await newUser.save();
+      log.info('Saved the new user to the database');
 
-      log.debug('Saved the new user to the database');
       generateToken(savedUser._id, res);
+      log.info('Generated token.');
 
       const fullName = `${savedUser.firstName} ${savedUser.lastName}`;
       log.info(`New user: "${fullName}" sucessfully created.`);
