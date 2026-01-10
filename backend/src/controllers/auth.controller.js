@@ -25,19 +25,21 @@ export const signup = async (req, res) => {
 
   try {
     if (!allStringsAreNotEmpty(firstName, lastName, email, password)) {
-      log.debug('Some signup info is missing.');
+      log.warn('Sign up attempt with missing required fields');
       return res.status(400).json({ message: 'All fields are required' });
     }
 
     if (!validateEmail(email)) {
-      log.debug('User sent in an invalid email.');
+      log.warn({ email }, 'Sign up attempt with invalid email format');
       return res.status(400).json({ message: 'Invalid email format' });
     }
 
     if (!validateSafePassword(password)) {
-      log.debug('User password is too short');
+      log.warn('Sign up attempt with password that is too short');
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
+
+    log.debug({ email }, 'Checking if user already exists in database');
 
     // Check if the user exists by checking for the same email in our database.
     // Ref: https://mongoosejs.com/docs/models.html
@@ -45,10 +47,11 @@ export const signup = async (req, res) => {
     const existingUser = await User.findOne({ email }).exec();
 
     if (existingUser) {
-      log.info('Cannot sign up: user with email already exists.');
+      log.warn({ email }, 'Sign up attempt with email that already exists');
       return res.status(400).json({ message: 'Account with this email already exists.' });
     }
 
+    log.debug('Hashing password for new user');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -63,14 +66,18 @@ export const signup = async (req, res) => {
     if (newUser) {
       // Save our new user before generating a token so we don't make a token for a non-persisted user.
       // The code below can throw an error (e.g., if there's a signup duplicate).
+      log.debug({ email }, 'Saving new user to database');
       const savedUser = await newUser.save();
-      log.info('Saved the new user to the database');
+      log.debug({ userId: savedUser._id }, 'New user saved to database');
 
       generateToken(savedUser._id, res);
-      log.info('Generated token.');
+      log.debug({ userId: savedUser._id }, 'JWT token generated');
 
       const fullName = `${savedUser.firstName} ${savedUser.lastName}`;
-      log.info(`New user: "${fullName}" sucessfully created.`);
+      log.info(
+        { userId: savedUser._id, email: savedUser.email },
+        `New user "${fullName}" successfully created`
+      );
 
       res.status(201).json({
         _id: savedUser._id,
@@ -80,15 +87,19 @@ export const signup = async (req, res) => {
       });
 
       // Fire-and-forget; do not delay response based on email latency (i.e., don't use try-catch on this async function)
+      log.debug({ email: savedUser.email }, 'Sending welcome email (fire-and-forget)');
       sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL).catch((error) => {
-        log.error(error, 'Error with sending welcome email:');
+        // PW: err has a special meaning to pino. if we didn't put the key of "err" for error, the error wouldn't show up
+        // Ref: https://getpino.io/#/docs/api?id=error
+        // Ref: https://getpino.io/#/docs/api?id=mergingobject
+        log.error({ err: error, email: savedUser.email }, 'Error sending welcome email');
       });
     } else {
-      log.info('Could not create a new user.');
+      log.warn('Failed to create new user instance.');
       res.status(400).json({ message: 'Invalid user data.' });
     }
   } catch (error) {
-    log.error(error, 'Error with signup controller:');
+    log.error(error, 'Error in signup controller');
 
     // Handle race-condition: unique email constraint violation
     if (error?.code === 11000 && (error.keyPattern?.email || error.keyValue?.email)) {
@@ -106,31 +117,39 @@ export const login = async (req, res) => {
 
   try {
     if (!allStringsAreNotEmpty(email, password)) {
-      log.debug('Some login info is missing.');
+      log.warn('Login attempt with missing required fields');
       return res.status(400).json({ message: 'All fields are required' });
     }
 
     if (!validateEmail(email)) {
-      log.debug('User sent in an invalid email.');
+      log.warn({ email }, 'Login attempt with invalid email format');
       return res.status(400).json({ message: 'Invalid email format' });
     }
 
+    log.debug({ email }, 'Looking up user for login');
     const loggedInUser = await User.findOne({ email });
+
     if (!loggedInUser) {
       // NOTE: never tell the client what didn't pass (email or password)
-      log.info('Login attempt: Could not find user with this email and password combination');
+      log.warn({ email }, 'Login attempt for non-existent user');
       return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
     }
 
+    log.debug({ userId: loggedInUser._id }, 'Comparing password hash');
     const passwordMatches = await bcrypt.compare(password, loggedInUser.password);
+
     if (!passwordMatches) {
-      log.info('Login attempt: Password does not match');
+      log.warn({ userId: loggedInUser._id, email }, 'Login attempt with incorrect password');
       return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
     }
 
     generateToken(loggedInUser._id, res);
+    log.debug({ userId: loggedInUser._id }, 'JWT token generated');
 
-    log.info(`"${loggedInUser.firstName} ${loggedInUser.lastName}" sucessfully signed in.`);
+    log.info(
+      { userId: loggedInUser._id, email: loggedInUser.email },
+      `User "${loggedInUser.firstName} ${loggedInUser.lastName}" successfully signed in`
+    );
 
     res.status(200).json({
       _id: loggedInUser._id,
@@ -139,7 +158,9 @@ export const login = async (req, res) => {
       profilePic: loggedInUser.profilePic,
     });
   } catch (error) {
-    log.error(error, 'Error with login controller:');
+    // Ref: https://getpino.io/#/docs/api?id=mergingobject
+    // Ref: https://getpino.io/#/docs/api?id=error
+    log.error({ err: error }, 'Error in login controller');
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -148,7 +169,7 @@ export const logout = (_, res) => {
   log.info('Logout endpoint reached');
 
   clearToken(res);
-  log.info('Cleared "jwt" token, logging out the user');
+  log.debug('JWT token cleared from response');
 
   res.status(200).json({ message: 'Logged out successfully' });
 };
@@ -160,32 +181,42 @@ export const deleteUser = async (req, res) => {
 
   // Validate required fields
   if (!allStringsAreNotEmpty(email, password)) {
-    log.info('Email or password missing for user deletion');
+    log.warn('Delete user attempt with missing required fields');
     return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
+    log.debug({ email }, 'Looking up user for deletion');
     const existingUser = await User.findOne({ email }).exec();
+
     if (!existingUser) {
-      log.info('Delete attempt: User with email could not be found');
+      log.warn({ email }, 'Delete attempt for non-existent user');
       return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
     }
 
+    log.debug({ userId: existingUser._id }, 'Verifying password for user deletion');
     const passwordMatches = await bcrypt.compare(password, existingUser.password);
+
     if (!passwordMatches) {
-      log.info('Delete attempt: Password does not match');
+      log.warn({ userId: existingUser._id, email }, 'Delete attempt with incorrect password');
       return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
     }
 
+    log.debug({ userId: existingUser._id, email }, 'Deleting user from database');
     await User.findByIdAndDelete(existingUser._id);
-    log.info(`User ${existingUser.email} successfully deleted`);
+    log.info(
+      { userId: existingUser._id, email },
+      `User ${existingUser.email} successfully deleted`
+    );
 
     clearToken(res);
-    log.info('Cleared "jwt" token, logging out the user');
+    log.debug('JWT token cleared from response');
 
     return res.status(200).json({ message: 'Account successfully deleted' });
   } catch (error) {
-    log.error(error, 'Error with deleteUser controller');
+    // Ref: https://getpino.io/#/docs/api?id=error
+    // Ref: https://getpino.io/#/docs/api?id=mergingobject
+    log.error({ err: error }, 'Error in deleteUser controller');
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
