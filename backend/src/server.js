@@ -11,26 +11,40 @@ import '#config/dotEnv.js';
 
 /* Import our custom modules */
 import { parentLogger, shutDownLogger } from '#config/logger.js';
-/* DIAGNOSTIC BLOCK - ADD THIS */
+
+/* DIAGNOSTIC BLOCK - REPLACE THE OLD ONE */
 console.log('=== DIAGNOSTIC START ===');
 console.log('1. Console.log works');
 console.error('2. Console.error works');
 
-try {
-  parentLogger.info('3. Pino parentLogger.info test');
-  console.log('4. After pino call - no error thrown');
-} catch (error) {
-  console.error('5. ERROR calling parentLogger:', error);
-}
+console.log('LOG_LEVEL from env:', process.env.LOG_LEVEL);
+console.log('NODE_ENV from env:', process.env.NODE_ENV);
+
+// Test if parentLogger exists and has correct level
+console.log('parentLogger level:', parentLogger.level);
+console.log('parentLogger levelVal:', parentLogger.levelVal);
+
+// Try manual JSON log (what Pino would output)
+console.log(
+  JSON.stringify({
+    level: 30,
+    time: Date.now(),
+    msg: '3. Manual JSON log test',
+  })
+);
 
 try {
-  shutDownLogger.info('6. Pino shutDownLogger.info test');
-  console.log('7. After shutdown logger call - no error thrown');
+  parentLogger.info('4. Pino parentLogger.info test');
+  console.log('5. After pino call - no error thrown');
 } catch (error) {
-  console.error('8. ERROR calling shutDownLogger:', error);
+  console.error('ERROR calling parentLogger:', error);
 }
+
+// Try forcing a flush
+process.stdout.write('6. Direct stdout.write test\n');
 
 console.log('=== DIAGNOSTIC END ===');
+/* END DIAGNOSTIC BLOCK */
 
 import { connectDB } from '#lib/db.js';
 import healthCheckRoute from '#routes/api/health.route.js';
