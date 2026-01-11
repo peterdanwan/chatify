@@ -11,6 +11,27 @@ import '#config/dotEnv.js';
 
 /* Import our custom modules */
 import { parentLogger, shutDownLogger } from '#config/logger.js';
+/* DIAGNOSTIC BLOCK - ADD THIS */
+console.log('=== DIAGNOSTIC START ===');
+console.log('1. Console.log works');
+console.error('2. Console.error works');
+
+try {
+  parentLogger.info('3. Pino parentLogger.info test');
+  console.log('4. After pino call - no error thrown');
+} catch (error) {
+  console.error('5. ERROR calling parentLogger:', error);
+}
+
+try {
+  shutDownLogger.info('6. Pino shutDownLogger.info test');
+  console.log('7. After shutdown logger call - no error thrown');
+} catch (error) {
+  console.error('8. ERROR calling shutDownLogger:', error);
+}
+
+console.log('=== DIAGNOSTIC END ===');
+
 import { connectDB } from '#lib/db.js';
 import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
