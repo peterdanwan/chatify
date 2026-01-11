@@ -27,7 +27,7 @@ function createPinoLogger(usePretty = false) {
       });
     } catch (error) {
       // Fallback to standard logger if pino-pretty isn't available
-      const fallbackLogger = pino(baseOptions, pino.destination({ sync: true }));
+      const fallbackLogger = pino(baseOptions, process.stdout);
       fallbackLogger
         .child({ module: 'logger.js' })
         .warn(error, 'pino-pretty not available, using standard JSON logging');
@@ -37,7 +37,7 @@ function createPinoLogger(usePretty = false) {
 
   // FOR PRODUCTION: Use synchronous logging to ensure logs aren't buffered
   // This is critical for containerized environments like Sevalla
-  return pino(baseOptions, pino.destination({ sync: true }));
+  return pino(baseOptions, process.stdout);
 }
 
 // In development, while we are debugging by ourselves, we will use
@@ -51,4 +51,4 @@ const shouldUsePretty = NODE_ENV === 'development' && LOG_LEVEL === 'debug';
 export const parentLogger = createPinoLogger(shouldUsePretty);
 
 // Create a synchronous logger specifically for shutdown scenarios
-export const shutDownLogger = pino(baseOptions, pino.destination({ sync: true }));
+export const shutDownLogger = pino(baseOptions, process.stdout);
