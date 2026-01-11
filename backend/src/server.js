@@ -62,14 +62,12 @@ connectDB()
   .then(() => {
     server = stoppable(
       app.listen(PORT, () => {
-        console.log(`Server listening on port: ${3000}`);
-        // log.info(`Server listening on port: ${PORT}`);
+        log.info(`Server listening on port: ${PORT}`);
       })
     );
   })
   // Better to "catch" the error at the top-most level where we call connectDB(), rather than within connectDB() itself.
   .catch((error) => {
-    console.error('Error connecting to MongoDB', { error });
     log.error(error, 'Error connecting to MongoDB');
     process.exit(1); // 1 status code means fail, 0 means success
   });
@@ -82,11 +80,9 @@ const gracefulShutdown = (signal) => {
   if (server) {
     server.stop((err) => {
       if (err) {
-        console.error('Error during shutdown:', { err });
         shutDownLogger.error('Error during shutdown:', err);
         process.exit(1);
       }
-      console.error('Server stopped gracefully');
       shutDownLogger.info('Server stopped gracefully');
       process.exit(0);
     });
