@@ -11,37 +11,34 @@ import '#config/dotEnv.js';
 
 /* Import our custom modules */
 import { parentLogger, shutDownLogger } from '#config/logger.js';
+import pino from 'pino';
 
-/* DIAGNOSTIC BLOCK - REPLACE THE OLD ONE */
+/* DIAGNOSTIC BLOCK */
 console.log('=== DIAGNOSTIC START ===');
 console.log('1. Console.log works');
-console.error('2. Console.error works');
 
-console.log('LOG_LEVEL from env:', process.env.LOG_LEVEL);
-console.log('NODE_ENV from env:', process.env.NODE_ENV);
+// Test different output methods
+console.log('2. Plain string');
+console.log('3. String with json word but not JSON format');
+console.log('{"level":30,"msg":"4. Manual JSON on one line"}');
+console.log('5. After manual JSON');
 
-// Test if parentLogger exists and has correct level
-console.log('parentLogger level:', parentLogger.level);
-console.log('parentLogger levelVal:', parentLogger.levelVal);
+// Test stderr
+console.error('6. Console.error plain string');
+console.error('{"level":30,"msg":"7. Console.error with JSON"}');
 
-// Try manual JSON log (what Pino would output)
-console.log(
-  JSON.stringify({
-    level: 30,
-    time: Date.now(),
-    msg: '3. Manual JSON log test',
-  })
-);
+// Test writing to stderr directly
+process.stderr.write('8. Direct stderr.write\n');
+process.stderr.write('{"level":30,"msg":"9. stderr JSON"}\n');
 
+// Try logging without creating a logger
 try {
-  parentLogger.info('4. Pino parentLogger.info test');
-  console.log('5. After pino call - no error thrown');
-} catch (error) {
-  console.error('ERROR calling parentLogger:', error);
+  const testLogger = pino({ level: 'info' }, process.stdout);
+  testLogger.info('10. Direct pino test');
+  console.log('11. After direct pino test');
+} catch (e) {
+  console.error('12. Error creating test logger:', e.message);
 }
-
-// Try forcing a flush
-process.stdout.write('6. Direct stdout.write test\n');
 
 console.log('=== DIAGNOSTIC END ===');
 /* END DIAGNOSTIC BLOCK */
