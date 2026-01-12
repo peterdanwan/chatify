@@ -27,6 +27,7 @@ function createPinoLogger() {
       });
     } catch (error) {
       // Fallback to standard logger if pino-pretty isn't available
+      console.warn("Can't use pino-pretty");
       const fallbackLogger = pino(baseOptions, process.stdout);
       fallbackLogger
         .child({ module: 'logger.js' })
