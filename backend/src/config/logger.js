@@ -12,13 +12,11 @@
 
 import pino from 'pino';
 
-const { NODE_ENV, LOG_LEVEL } = process.env;
+const { LOG_LEVEL, USE_PRETTY } = process.env;
 const baseOptions = { level: LOG_LEVEL };
 
-function createPinoLogger(usePretty = false) {
-  const forcePretty = true;
-
-  if (usePretty || forcePretty) {
+function createPinoLogger() {
+  if (USE_PRETTY === 'true') {
     try {
       return pino({
         ...baseOptions,
@@ -42,15 +40,17 @@ function createPinoLogger(usePretty = false) {
   return pino(baseOptions, process.stdout);
 }
 
+// DEPRECATED:
 // In development, while we are debugging by ourselves, we will use
 // the 'pino-pretty' devDependency to format our logs.
 // Otherwise, we want the raw JSON from pino to be sent to other services to be processed.
-const shouldUsePretty = NODE_ENV === 'development' && LOG_LEVEL === 'debug';
+// const shouldUsePretty = NODE_ENV === 'development' && LOG_LEVEL === 'debug';
+// CURRENT: (just use pino-pretty depending on the PaaS)
 
 // Export our configured pino logger
 // Note: if pino-pretty isn't installed (e.g., in Production and the env file is not set up correctly) it can throw an error.
 //       This issue is caught by "createPinoLogger()".
-export const parentLogger = createPinoLogger(shouldUsePretty);
+export const parentLogger = createPinoLogger();
 
 // Create a synchronous logger specifically for shutdown scenarios
 export const shutDownLogger = pino(baseOptions, process.stdout);

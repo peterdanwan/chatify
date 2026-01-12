@@ -11,38 +11,6 @@ import '#config/dotEnv.js';
 
 /* Import our custom modules */
 import { parentLogger, shutDownLogger } from '#config/logger.js';
-import pino from 'pino';
-
-/* DIAGNOSTIC BLOCK */
-console.log('=== DIAGNOSTIC START ===');
-console.log('1. Console.log works');
-
-// Test different output methods
-console.log('2. Plain string');
-console.log('3. String with json word but not JSON format');
-console.log('{"level":30,"msg":"4. Manual JSON on one line"}');
-console.log('5. After manual JSON');
-
-// Test stderr
-console.error('6. Console.error plain string');
-console.error('{"level":30,"msg":"7. Console.error with JSON"}');
-
-// Test writing to stderr directly
-process.stderr.write('8. Direct stderr.write\n');
-process.stderr.write('{"level":30,"msg":"9. stderr JSON"}\n');
-
-// Try logging without creating a logger
-try {
-  const testLogger = pino({ level: 'info' }, process.stdout);
-  testLogger.info('10. Direct pino test');
-  console.log('11. After direct pino test');
-} catch (e) {
-  console.error('12. Error creating test logger:', e.message);
-}
-
-console.log('=== DIAGNOSTIC END ===');
-/* END DIAGNOSTIC BLOCK */
-
 import { connectDB } from '#lib/db.js';
 import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
