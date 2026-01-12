@@ -16,7 +16,9 @@ const { NODE_ENV, LOG_LEVEL } = process.env;
 const baseOptions = { level: LOG_LEVEL };
 
 function createPinoLogger(usePretty = false) {
-  if (usePretty) {
+  const forcePretty = true;
+
+  if (usePretty || forcePretty) {
     try {
       return pino({
         ...baseOptions,
