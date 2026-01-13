@@ -26,7 +26,7 @@ export const protectRoute = async (req, res, next) => {
       return res.status(401).json({ message: 'Unauthorized - Invalid token' });
     }
 
-    log.debug({ userId: decoded.userID }, 'Checking if the user exists in the database');
+    log.debug({ userId: decoded.userId }, 'Checking if the user exists in the database');
 
     // Ref: https://mongoosejs.com/docs/api/query.html#Query.prototype.select()
     // - syntax: select('-<field_1> -<field_2>') to exclude
