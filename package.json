@@ -50,8 +50,10 @@
     "mongo:rm": "docker rm mongodb-chatify-db",
     "mongo:clean": "docker stop mongodb-chatify-db && docker rm mongodb-chatify-db",
     "bash:signup": "bash ./_scripts/bash/signup.sh",
-    "node:signup": "node ./_scripts/node/signup.js",
+    "bash:login": "bash ./_scripts/bash/login.sh",
     "bash:delete-user": "bash ./_scripts/bash/delete-user.sh",
+    "node:signup": "node ./_scripts/node/signup.js",
+    "node:login": "bash ./_scripts/bash/login.js",
     "node:delete-user": "node ./_scripts/node/delete-user.js"
   },
   "keywords": [],
