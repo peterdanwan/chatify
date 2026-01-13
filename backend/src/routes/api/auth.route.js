@@ -2,7 +2,14 @@
 
 import express from 'express';
 import { parentLogger } from '#config/logger.js';
-import { signup, login, logout, deleteUser } from '#controllers/auth.controller.js';
+import {
+  signup,
+  login,
+  logout,
+  deleteUser,
+  updateProfile,
+  protectRoute,
+} from '#controllers/auth.controller.js';
 
 const log = parentLogger.child({ module: 'auth.route.js' });
 
@@ -22,6 +29,10 @@ router.post('/login', login);
 // 3. This prevents CSRF attacks where a malicious site could log users out
 //    by simply embedding a link to the logout endpoint.
 router.post('/logout', logout);
+
+// Ref: https://expressjs.com/en/api.html#middleware-callback-function-examples
+router.put('/update-profile', protectRoute, updateProfile);
+
 router.delete('/delete-user', deleteUser);
 
 log.info('Initialized "auth" routes');
