@@ -2,14 +2,9 @@
 
 import express from 'express';
 import { parentLogger } from '#config/logger.js';
-import {
-  signup,
-  login,
-  logout,
-  deleteUser,
-  updateProfile,
-  protectRoute,
-} from '#controllers/auth.controller.js';
+import { signup, login, logout, deleteUser, updateProfile } from '#controllers/auth.controller.js';
+
+import { protectRoute } from '#middleware/auth.middleware.js';
 
 const log = parentLogger.child({ module: 'auth.route.js' });
 
