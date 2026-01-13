@@ -28,7 +28,7 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 /* Middleware */
-app.use(express.json()); // Lets each route parse the body a request and access it through req.body
+app.use(express.json()); // Lets each route parse the body of a request and access it through req.body
 
 /* Health check endpoint - BEFORE other routes so it's always accessible */
 app.use('/health', healthCheckRoute);
