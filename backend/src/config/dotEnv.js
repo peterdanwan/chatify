@@ -149,6 +149,24 @@ const ENV_VARS = {
   },
 
   // ============================================
+  // Cloudinary (to upload assets like images & videos)
+  // ============================================
+  CLOUDINARY_CLOUD_NAME: {
+    required: true,
+    description:
+      'Cloudinary Cloud Name - makes a connection string with CLOUDINARY_API_KEY and CLOUDINARY_SECRET',
+  },
+  CLOUDINARY_API_KEY: {
+    required: true,
+    description:
+      'Cloudinary API key - makes a connection string with CLOUDINARY_CLOUD_NAME and CLOUDINARY_SECRET',
+  },
+  CLOUDINARY_SECRET: {
+    required: true,
+    description:
+      'Cloudinary Secret - makes a connection string with CLOUDINARY_CLOUD_NAME and CLOUDINARY_SECRET',
+  },
+  // ============================================
   // Frontend Configuration
   // ============================================
   CLIENT_URL: {
