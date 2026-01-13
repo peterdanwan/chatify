@@ -25,10 +25,11 @@ router.post('/login', login);
 //    by simply embedding a link to the logout endpoint.
 router.post('/logout', logout);
 
+// PROTECTED ROUTES:
 // Ref: https://expressjs.com/en/api.html#middleware-callback-function-examples
 router.put('/update-profile', protectRoute, updateProfile);
-
-router.delete('/delete-user', deleteUser);
+router.delete('/delete-user', protectRoute, deleteUser);
+router.get('/check', protectRoute, (req, res) => res.status(200).json(req.user));
 
 log.info('Initialized "auth" routes');
 
