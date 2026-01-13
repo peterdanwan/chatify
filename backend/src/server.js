@@ -5,6 +5,7 @@ import express from 'express';
 import stoppable from 'stoppable';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
 
 /* Run dotEnv config before all other files that require env variables */
 import '#config/dotEnv.js';
@@ -29,6 +30,7 @@ const PORT = process.env.PORT || 5001;
 
 /* Middleware */
 app.use(express.json()); // Lets each route parse the body of a request and access it through req.body
+app.use(cookieParser());
 
 /* Health check endpoint - BEFORE other routes so it's always accessible */
 app.use('/health', healthCheckRoute);
