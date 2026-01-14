@@ -12,6 +12,7 @@ import {
   validateSafePassword,
   allStringsAreNotEmpty,
 } from '#lib/utils.js';
+import cloudinary from '#lib/cloudinary.js';
 
 const log = parentLogger.child({ module: 'auth.controller.js' });
 
@@ -218,5 +219,34 @@ export const deleteUser = async (req, res) => {
     // Ref: https://getpino.io/#/docs/api?id=mergingobject
     log.error({ err: error }, 'Error in deleteUser controller');
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+
+    if (!profilePic) {
+      log.warn('Profile picture is missing');
+      return res.status(400).json({ message: 'Profile pic is required' });
+    }
+
+    // The "protectRoute" middleware lets us access the user directly from the "req" object.
+    // Without the setup in our middleware, req.user would be undefined and we would have broken code.
+    const userId = req.user._id;
+
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+
+    // Update the user's profile in the database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true }
+    );
+
+    res.status(201).json(updatedUser);
+  } catch (error) {
+    log.error(error, 'Error in updateProfile controller');
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
