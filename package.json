@@ -53,10 +53,12 @@
     "bash:login": "bash ./_scripts/bash/login.sh",
     "bash:logout": "bash ./_scripts/bash/logout.sh",
     "bash:delete-user": "bash ./_scripts/bash/delete-user.sh",
+    "bash:check": "bash ./_scripts/bash/check.sh",
     "node:signup": "node ./_scripts/node/signup.js",
-    "node:login": "node ./_scripts/bash/login.js",
-    "node:logout": "node ./_scripts/bash/logout.sh",
-    "node:delete-user": "node ./_scripts/node/delete-user.js"
+    "node:login": "node ./_scripts/node/login.js",
+    "node:logout": "node ./_scripts/node/logout.js",
+    "node:delete-user": "node ./_scripts/node/delete-user.js",
+    "node:check": "node ./_scripts/node/check.js"
   },
   "keywords": [],
   "author": "Peter Wan",
