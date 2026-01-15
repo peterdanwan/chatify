@@ -28,6 +28,8 @@ export const generateToken = (userId, res) => {
   // Create JWT token containing the userId, signed with secret, expires in 7 days
   const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 
+  // res.cookie(name, value, optionsObject) is a built-in express method made for SENDING/SETTING cookies to the browser/client
+  // res.cookies is for READING cookies from the browser/client, and requires the cookie-parser middleware
   // Send token as an HTTP-only cookie for security
   res.cookie('jwt', token, {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
@@ -41,6 +43,8 @@ export const generateToken = (userId, res) => {
 
 // Clear the "jwt" token created from generateToken (stored in the client's browser), effectively logging out the user
 export const clearToken = (res) => {
+  // res.cookie(name, value, optionsObject) is a built-in express method made for SENDING/SETTING cookies to the browser/client
+  // res.cookies is for READING cookies from the browser/client, and requires the cookie-parser middleware
   res.cookie('jwt', '', {
     maxAge: 0,
     httpOnly: true, // prevent XSS attacks (can't access this token via JS): cross-site scripting

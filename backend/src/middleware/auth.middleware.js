@@ -12,6 +12,7 @@ export const protectRoute = async (req, res, next) => {
 
     // 1. This 'jwt' cookie is from the utils.js generateToken() function.
     // 2. To access this 'jwt' token from req.cookies, we configured the "cookie-parser" middleware in server.js.
+    // 2. cookie-parser middleware (configured in server.js) parses the Cookie header and makes cookies accessible via req.cookies
     const token = req.cookies.jwt;
     if (!token) {
       log.warn('Unauthorized request: No token provided');
