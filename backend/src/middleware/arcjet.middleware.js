@@ -43,8 +43,16 @@ export const arcjetProtection = async (req, res, next) => {
     }
 
     log.info('Arcjet accepted the request');
+    next();
   } catch (error) {
     log.error(error, 'Arcjet Protection Error');
-    next();
+
+    if (process.env.ARCJET_FAIL_OPEN === 'true') {
+      return next();
+    }
+
+    return res
+      .status(503)
+      .json({ code: 'PROTECTION_UNAVAILABLE', message: 'Service temporarily unavailable.' });
   }
 };
