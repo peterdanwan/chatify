@@ -180,6 +180,11 @@ const ENV_VARS = {
     description: `Run Arcjet in development: <https://docs.arcjet.com/environment#arcjet-env>.`,
     example: 'ajkey_xxxxxxxxxxxxxxxxxxxxxxxxxx',
   },
+  ARCJET_FAIL_OPEN: {
+    required: true,
+    description: `When true, allows other middleware to still work even if the ARCJET rate-limiting protection doesn't work`,
+    values: ['true', 'false'],
+  },
 
   // ============================================
   // Frontend Configuration
