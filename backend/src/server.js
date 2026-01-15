@@ -5,6 +5,7 @@ import express from 'express';
 import stoppable from 'stoppable';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
 
 /* Run dotEnv config before all other files that require env variables */
 import '#config/dotEnv.js';
@@ -28,7 +29,15 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 /* Middleware */
-app.use(express.json()); // Lets each route parse the body a request and access it through req.body
+
+// Lets each route parse the body of a request and access it through req.body
+// By default limit is 50kb
+app.use(express.json({ limit: '5MB' }));
+
+// The cookie-parser middleware lets each route read/parse the cookies
+// from the 'Cookie' header of a request and makes the cookies accessible through "req.cookies".
+// In contrast, "res.cookies(name, value, optionsObject)" lets us SET the value of a cookie per function call.
+app.use(cookieParser());
 
 /* Health check endpoint - BEFORE other routes so it's always accessible */
 app.use('/health', healthCheckRoute);
