@@ -20,7 +20,7 @@ const log = parentLogger.child({ module: 'auth.controller.js' });
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
 
 export const signup = async (req, res) => {
-  log.info('Sign up endpoint reached.');
+  log.info('/signup (POST) endpoint reached');
 
   const { firstName, lastName, email, password } = normalizeInputs(req.body);
 
@@ -112,7 +112,7 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  log.info('Login endpoint reached');
+  log.info('/login (POST) endpoint reached');
 
   const { email, password } = normalizeInputs(req.body);
 
@@ -167,7 +167,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (_, res) => {
-  log.info('Logout endpoint reached');
+  log.info("'/logout' (POST) endpoint reached");
 
   clearToken(res);
   log.debug('JWT token cleared from response');
@@ -176,7 +176,7 @@ export const logout = (_, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  log.info('Delete user endpoint reached');
+  log.info("'/delete-user' (DELETE) endpoint reached");
 
   const { email, password } = normalizeInputs(req.body);
 
@@ -223,6 +223,8 @@ export const deleteUser = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
+  log.info("'/update-profile' (PUT) endpoint reached");
+
   try {
     const { profilePic } = req.body;
 
