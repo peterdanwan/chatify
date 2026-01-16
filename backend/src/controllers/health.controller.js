@@ -2,7 +2,7 @@
 
 import { parentLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'auth.controller.js' });
+const log = parentLogger.child({ module: 'health.controller.js' });
 
 export const healthCheck = (req, res) => {
   log.info("'/health' (GET) endpoint reached.");
