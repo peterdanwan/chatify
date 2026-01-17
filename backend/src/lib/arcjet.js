@@ -2,11 +2,10 @@
 
 import arcjet, { shield, detectBot, slidingWindow } from '@arcjet/node';
 
-// TODO: Use the code below instead of setting mode to 'LIVE' indiscriminately
-// const { ARCJET_ENV, NODE_ENV } = process.env;
+const { ARCJET_ENV, NODE_ENV } = process.env;
 // Use ARCJET_ENV to determine mode, falling back to NODE_ENV if not set
-// const mode = (ARCJET_ENV ?? NODE_ENV) === 'production' ? 'LIVE' : 'DRY_RUN';
-const mode = 'LIVE';
+const mode = (ARCJET_ENV ?? NODE_ENV) === 'production' ? 'LIVE' : 'DRY_RUN';
+// const mode = 'LIVE';
 
 // Ref: https://docs.arcjet.com/get-started?f=node-js-express
 export const aj = arcjet({
