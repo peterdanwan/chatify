@@ -15,11 +15,11 @@ const log = parentLogger.child({ module: 'message.route.js' });
 
 const router = express.Router();
 
-// Since all of our message routes should be:
-// 1. Rate limited
-// 2. Protected (via authentication)
+// Since all our message routes should have:
+// 1. Rate limiting, AND
+// 2. Authentication protection...
 //
-// We can set up our middleware to run prior to any specific route-handling logic via router.use()
+// We have our router run both of these middlewares in this sequence (via router.use()) prior to any route-handling logic
 router.use(arcjetProtection, protectRoute);
 
 router.get('/contacts', getAllContacts);
