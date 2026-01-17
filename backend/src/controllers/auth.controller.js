@@ -15,12 +15,13 @@ import {
 import cloudinary from '#lib/cloudinary.js';
 
 const log = parentLogger.child({ module: 'auth.controller.js' });
+const ENDPOINT_PREFIX = '/api/auth';
 
 // Ref: https://mongoosejs.com/docs/api/model.html
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
 
 export const signup = async (req, res) => {
-  log.info('/signup (POST) endpoint reached');
+  log.info(`'${ENDPOINT_PREFIX}/signup' (POST) endpoint reached`);
 
   const { firstName, lastName, email, password } = normalizeInputs(req.body);
 
@@ -112,7 +113,7 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  log.info('/login (POST) endpoint reached');
+  log.info(`'${ENDPOINT_PREFIX}/login' (POST) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
 
@@ -167,7 +168,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (_, res) => {
-  log.info("'/logout' (POST) endpoint reached");
+  log.info(`'${ENDPOINT_PREFIX}/logout' (POST) endpoint reached`);
 
   clearToken(res);
   log.debug('JWT token cleared from response');
@@ -176,7 +177,7 @@ export const logout = (_, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  log.info("'/delete-user' (DELETE) endpoint reached");
+  log.info(`'${ENDPOINT_PREFIX}/delete-user' (DELETE) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
 
@@ -223,7 +224,7 @@ export const deleteUser = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  log.info("'/update-profile' (PUT) endpoint reached");
+  log.info(`'${ENDPOINT_PREFIX}/update-profile' (PUT) endpoint reached`);
 
   try {
     const { profilePic } = req.body;
