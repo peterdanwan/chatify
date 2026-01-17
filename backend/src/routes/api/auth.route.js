@@ -11,6 +11,8 @@ const log = parentLogger.child({ module: 'auth.route.js' });
 
 const router = express.Router();
 
+// RATE LIMITED PROTECTED ROUTES (via ARCJET):
+// -------------------------------------------
 // Instead of doing:
 // router.post('/signup', arcjetProtection, signup);
 // router.post('/login', arcjetProtection, login);
@@ -19,7 +21,7 @@ const router = express.Router();
 // router.delete('/delete-user', arcjetProtection, protectRoute, deleteUser);
 // router.get('/check', arcjetProtection, protectRoute, (req, res) => res.status(200).json(req.user));
 // We can ensure that our arcjetProtection middleware runs before any of our other middleware and route handlers by:
-//  1. placing it in using app.use()
+//  1. placing it within app.use()
 //  2. calling the next() function within our arcjetProtection function to pass the req, res, and next arguments to the next middleware / route handlers
 // By doing this, we've ensured all our routes are rate limit protected.
 router.use(arcjetProtection);
@@ -40,10 +42,19 @@ router.post('/login', login);
 router.post('/logout', logout);
 
 // PROTECTED ROUTES:
+// -----------------
+// Applies ONLY to routes below this line
+//
+// NOTE: If we DIDN'T put the router.use(protectRoute); line above our protected routes...
+// Our protected routes would look like this:
+//   - router.put('/update-profile', protectRoute, updateProfile);
+//   - router.put('/delete-user', protectRoute, deleteUser);
+//   - router.put('/check', protectRoute, (req, res) => res.status(200).json(req.user));
 // Ref: https://expressjs.com/en/api.html#middleware-callback-function-examples
-router.put('/update-profile', protectRoute, updateProfile);
-router.delete('/delete-user', protectRoute, deleteUser);
-router.get('/check', protectRoute, (req, res) => res.status(200).json(req.user));
+router.use(protectRoute);
+router.put('/update-profile', updateProfile);
+router.delete('/delete-user', deleteUser);
+router.get('/check', (req, res) => res.status(200).json(req.user));
 
 log.info('Initialized "auth" routes');
 
