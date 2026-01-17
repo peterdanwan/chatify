@@ -18,6 +18,7 @@ const messageSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    // Message allows for both text and/or image to be sent
     text: {
       type: String,
     },
