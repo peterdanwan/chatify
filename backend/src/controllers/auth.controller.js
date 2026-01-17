@@ -148,14 +148,16 @@ export const login = async (req, res) => {
     generateToken(loggedInUser._id, res);
     log.debug({ userId: loggedInUser._id }, 'JWT token generated');
 
+    const fullName = `${loggedInUser.firstName} ${loggedInUser.lastName}`;
     log.info(
       { userId: loggedInUser._id, email: loggedInUser.email },
-      `User "${loggedInUser.firstName} ${loggedInUser.lastName}" successfully signed in`
+      `User ${fullName} successfully signed in`
     );
 
     res.status(200).json({
       _id: loggedInUser._id,
-      fullName: loggedInUser.fullName,
+      firstName: loggedInUser.firstName,
+      lastName: loggedInUser.lastName,
       email: loggedInUser.email,
       profilePic: loggedInUser.profilePic,
     });
