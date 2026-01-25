@@ -2,6 +2,7 @@
 
 import express from 'express';
 import { createLogger } from '#config/logger.js';
+import { ENDPOINTS } from '#config/endpoints.js';
 import { signup, login, logout, deleteUser, updateProfile } from '#controllers/auth.controller.js';
 
 import { protectRoute } from '#middleware/auth.middleware.js';
@@ -10,6 +11,7 @@ import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 const log = createLogger(import.meta.url);
 
 const router = express.Router();
+const { SIGNUP, LOGIN, LOGOUT, UPDATE_PROFILE, DELETE_USER, CHECK } = ENDPOINTS.AUTH;
 
 // RATE LIMITED PROTECTED ROUTES (via ARCJET):
 // -------------------------------------------
@@ -26,8 +28,8 @@ const router = express.Router();
 // By doing this, we've ensured all our routes are rate limit protected.
 router.use(arcjetProtection);
 
-router.post('/signup', signup);
-router.post('/login', login);
+router.post(SIGNUP, signup);
+router.post(LOGIN, login);
 
 // Logout must use POST instead of GET because:
 // 1. GET requests should be "safe" - they should only retrieve data, not modify
@@ -39,7 +41,7 @@ router.post('/login', login);
 //    - Malicious sites using <img src="/logout"> or <a href="/logout">
 // 3. This prevents CSRF attacks where a malicious site could log users out
 //    by simply embedding a link to the logout endpoint.
-router.post('/logout', logout);
+router.post(LOGOUT, logout);
 
 // PROTECTED ROUTES:
 // -----------------
@@ -52,9 +54,9 @@ router.post('/logout', logout);
 //   - router.put('/check', protectRoute, (req, res) => res.status(200).json(req.user));
 // Ref: https://expressjs.com/en/api.html#middleware-callback-function-examples
 router.use(protectRoute);
-router.put('/update-profile', updateProfile);
-router.delete('/delete-user', deleteUser);
-router.get('/check', (req, res) => res.status(200).json(req.user));
+router.put(UPDATE_PROFILE, updateProfile);
+router.delete(DELETE_USER, deleteUser);
+router.get(CHECK, (req, res) => res.status(200).json(req.user));
 
 log.info('Initialized "auth" routes');
 
