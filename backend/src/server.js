@@ -11,14 +11,14 @@ import cookieParser from 'cookie-parser';
 import '#config/dotEnv.js';
 
 /* Import our custom modules */
-import { parentLogger, shutDownLogger } from '#config/logger.js';
+import { createLogger, shutDownLogger } from '#config/logger.js';
 import { connectDB } from '#lib/db.js';
 import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
 
 /* Create a child instance of our structured logger */
-const log = parentLogger.child({ module: 'server.js' });
+const log = createLogger(import.meta.url, true);
 
 /* ES6 way of extracting the __dirname of this file */
 const __filename = fileURLToPath(import.meta.url);

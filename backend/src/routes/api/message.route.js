@@ -1,7 +1,7 @@
 // backend/src/routes/api/message.route.js
 
 import express from 'express';
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 import {
   getAllContacts,
   getChatPartners,
@@ -11,7 +11,7 @@ import {
 import { protectRoute } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 
-const log = parentLogger.child({ module: 'message.route.js' });
+const log = createLogger(import.meta.url);
 
 const router = express.Router();
 

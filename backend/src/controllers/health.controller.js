@@ -1,8 +1,8 @@
 // backend/src/controllers/health.controller.js
 
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'health.controller.js' });
+const log = createLogger(import.meta.url);
 
 export const healthCheck = (req, res) => {
   log.info("'/health' (GET) endpoint reached.");

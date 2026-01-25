@@ -2,9 +2,9 @@
 
 import jwt from 'jsonwebtoken';
 import { User } from '#models/User.js';
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'auth.middleware.js' });
+const log = createLogger(import.meta.url);
 
 export const protectRoute = async (req, res, next) => {
   try {

@@ -1,9 +1,9 @@
 // backend/src/lib/db.js
 
 import mongoose from 'mongoose';
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'db.js' });
+const log = createLogger(import.meta.url);
 const { USE_LOCAL_DB, MONGO_DB_LOCAL_URI, MONGO_DB_URI } = process.env;
 
 export const connectDB = async () => {

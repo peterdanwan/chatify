@@ -2,9 +2,9 @@
 
 import aj from '#lib/arcjet.js';
 import { isSpoofedBot } from '@arcjet/inspect';
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'arcjet.middleware.js' });
+const log = createLogger(import.meta.url);
 
 export const arcjetProtection = async (req, res, next) => {
   log.debug('Running Arcjet middleware');

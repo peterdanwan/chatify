@@ -1,6 +1,6 @@
 // backend/src/controllers/auth.controller.js
 
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 import { User } from '#models/User.js';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeEmail } from '#emails/emailHandlers.js';
@@ -14,7 +14,7 @@ import {
 } from '#lib/utils.js';
 import cloudinary from '#lib/cloudinary.js';
 
-const log = parentLogger.child({ module: 'auth.controller.js' });
+const log = createLogger(import.meta.url);
 const ENDPOINT_PREFIX = '/api/auth';
 
 // Ref: https://mongoosejs.com/docs/api/model.html
