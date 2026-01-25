@@ -2,6 +2,7 @@
 
 import express from 'express';
 import { createLogger } from '#config/logger.js';
+import { ENDPOINTS } from '#config/endpoints.js';
 import {
   getAllContacts,
   getChatPartners,
@@ -12,6 +13,7 @@ import { protectRoute } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 
 const log = createLogger(import.meta.url);
+const { CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS;
 
 const router = express.Router();
 
@@ -23,19 +25,19 @@ const router = express.Router();
 router.use(arcjetProtection, protectRoute);
 
 // Gets all contacts in our database (PW: why?)
-router.get('/contacts', getAllContacts);
+router.get(CONTACTS, getAllContacts);
 
 // Gets the chats you have with other individuals
-router.get('/chats', getChatPartners);
+router.get(CHATS, getChatPartners);
 
 // Gets all the messages between the logged in user and another individual who's id we have
 // This is an example of a "dynamic route" (i.e., has a ':' followed by a named value (e.g., 'id'))
 // We can access the value of the id via req.params.id - since id is what we put for this endpoint.
 // From the frontend, we'd click on one of the chatPartners returned from getChatPartners, to get his id
-router.get('/:id', getMessagesByUserId);
+router.get(BY_USER_ID, getMessagesByUserId);
 
 // Sends a message to another user by using that other user's id in the request
-router.post('/send/:id', sendMessage);
+router.post(SEND_TO_ID, sendMessage);
 
 log.info('Initialized "message" routes');
 
