@@ -1,6 +1,7 @@
 // backend/src/lib/utils.js
 
 import jwt from 'jsonwebtoken';
+// import mongoose from 'mongoose';
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -87,3 +88,13 @@ export const validateSafePassword = (password) => {
 export const allStringsAreNotEmpty = (...values) => {
   return values.every((value) => typeof value === 'string' && value.length > 0);
 };
+
+// export const validateObjectId = (paramName) => {
+//   return (req, res, next) => {
+//     const val = req.params[paramName];
+//     if (!mongoose.Types.ObjectId.isValid(val)) {
+//       return res.status(400).json({ message: 'Invalid user id' });
+//     }
+//     next();
+//   };
+// };
