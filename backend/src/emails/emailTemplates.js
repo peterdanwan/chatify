@@ -1,8 +1,8 @@
 // backend/src/emails/emailTemplates.js
 
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'emailTemplates.js' });
+const log = createLogger(import.meta.url);
 
 export function createWelcomeEmailTemplate(name, clientURL) {
   // PW: As an FYI, this is an example of a "Transactional Stream" email.

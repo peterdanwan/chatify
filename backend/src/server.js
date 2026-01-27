@@ -11,14 +11,15 @@ import cookieParser from 'cookie-parser';
 import '#config/dotEnv.js';
 
 /* Import our custom modules */
-import { parentLogger, shutDownLogger } from '#config/logger.js';
+import { createLogger, shutDownLogger } from '#config/logger.js';
+import { ENDPOINT_PREFIXES } from '#config/endpoints.js';
 import { connectDB } from '#lib/db.js';
 import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
 
 /* Create a child instance of our structured logger */
-const log = parentLogger.child({ module: 'server.js' });
+const log = createLogger(import.meta.url, true);
 
 /* ES6 way of extracting the __dirname of this file */
 const __filename = fileURLToPath(import.meta.url);
@@ -40,11 +41,11 @@ app.use(express.json({ limit: '5MB' }));
 app.use(cookieParser());
 
 /* Health check endpoint - BEFORE other routes so it's always accessible */
-app.use('/health', healthCheckRoute);
+app.use(ENDPOINT_PREFIXES.HEALTH, healthCheckRoute);
 
 /* API Routes */
-app.use('/api/auth', authRoutes);
-app.use('/api/messages', messageRoutes);
+app.use(ENDPOINT_PREFIXES.AUTH, authRoutes);
+app.use(ENDPOINT_PREFIXES.MESSAGES, messageRoutes);
 
 /* In production, serve frontend from within our backend server */
 if (process.env.NODE_ENV === 'production') {

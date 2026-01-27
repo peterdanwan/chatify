@@ -2,9 +2,9 @@
 
 import jwt from 'jsonwebtoken';
 import { User } from '#models/User.js';
-import { parentLogger } from '#config/logger.js';
+import { createLogger } from '#config/logger.js';
 
-const log = parentLogger.child({ module: 'auth.middleware.js' });
+const log = createLogger(import.meta.url);
 
 export const protectRoute = async (req, res, next) => {
   try {
@@ -23,7 +23,7 @@ export const protectRoute = async (req, res, next) => {
     log.debug("Checking if the 'jwt' token is valid");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
-      log.info('Unauthorized request: Invalid token');
+      log.warn('Unauthorized request: Invalid token');
       return res.status(401).json({ message: 'Unauthorized - Invalid token' });
     }
 
@@ -44,6 +44,7 @@ export const protectRoute = async (req, res, next) => {
     // E.g.:
     //  - for router.put("/update-profile", protectRoute, updateProfile); ...
     //  - calling next() within protectRoute tells express to call updateProfile with the same req, res, and next objects.
+    log.info('User provided a valid JWT');
     next();
   } catch (error) {
     log.error(error, 'Error in protectRoute middleware');

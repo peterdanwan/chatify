@@ -11,6 +11,8 @@
 // 4. https://github.com/pinojs/pino/blob/main/docs/asynchronous.md
 
 import pino from 'pino';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 const { LOG_LEVEL, USE_PRETTY } = process.env;
 const baseOptions = { level: LOG_LEVEL };
@@ -54,3 +56,22 @@ export const parentLogger = createPinoLogger();
 
 // Create a synchronous logger specifically for shutdown scenarios
 export const shutDownLogger = pino(baseOptions, process.stdout);
+
+/**
+ * Creates a child logger with the module name automatically derived from import.meta.url
+ * @param {string} importMetaUrl - Pass import.meta.url from the calling module
+ * @param {boolean} [showFullPath=true] - If true, shows relative path from project root; if false, shows only filename
+ * @returns {pino.Logger} A child logger with the module attribute set
+ */
+export function createLogger(importMetaUrl, showFullPath = true) {
+  const filepath = fileURLToPath(importMetaUrl);
+
+  const moduleName = showFullPath
+    ? path.relative(process.cwd(), filepath)
+    : path.basename(filepath);
+
+  // Normalize path separators to forward slashes ('/') for consistency across platforms
+  const normalizedModuleName = moduleName.split(path.sep).join('/');
+
+  return parentLogger.child({ module: normalizedModuleName });
+}
