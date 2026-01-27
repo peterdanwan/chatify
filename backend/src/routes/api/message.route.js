@@ -13,7 +13,7 @@ import { protectRoute } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 
 const log = createLogger(import.meta.url);
-const { CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS;
+const { CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
 
 const router = express.Router();
 
@@ -34,6 +34,7 @@ router.get(CHATS, getChatPartners);
 // This is an example of a "dynamic route" (i.e., has a ':' followed by a named value (e.g., 'id'))
 // We can access the value of the id via req.params.id - since id is what we put for this endpoint.
 // From the frontend, we'd click on one of the chatPartners returned from getChatPartners, to get his id
+// NOTE: BY_USER_ID is /:id. This must come after CONTACTS and CHATS since it is a dynamic route and would match with CONTACTS and CHATS before they get reached.
 router.get(BY_USER_ID, getMessagesByUserId);
 
 // Sends a message to another user by using that other user's id in the request
