@@ -108,6 +108,25 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
+    // Text and Image validation
+    if (!text && !image) {
+      log.warn('Missing text and image');
+      return res.status(400).json({ message: 'Text or image is required.' });
+    }
+
+    // Prevent users from sending messages to themselves
+    if (senderId.equals(receiverId)) {
+      log.warn('User attempted to send a message to themselves (Invalid Request)');
+      return res.status(400).json({ message: 'Cannot send messages to yourself.' });
+    }
+
+    // Validate that the recipient of the message exists
+    const receiverExists = await User.exists({ _id: receiverId });
+    if (!receiverExists) {
+      log.warn(`No receiver with id: ${receiverId} exists`);
+      return res.status(404).json({ message: 'Receiver not found.' });
+    }
+
     let imageUrl = '';
 
     if (image) {
