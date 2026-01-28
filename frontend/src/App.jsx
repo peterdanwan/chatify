@@ -1,23 +1,28 @@
-import { useState } from 'react';
+// frontend/src/App.jsx
+
+import { Route, Routes } from 'react-router';
+import ChatPage from './pages/ChatPage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noopener noreferrer"></a>
-        <a href="https://react.dev" target="_blank" rel="noopener noreferrer"></a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </>
+    <div className="min-h-screen bg-slate-900 relative flex items-center justify-center p-4 overflow-hidden">
+      {/* DECORATORS - GRID BG & GLOW SHAPES in the corner */}
+      <div
+        // Get AI to help with stuff like this div
+        className="absolute inset-0 
+        bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
+        bg-size-[14px_24px]"
+      />
+      <div className="absolute top-0 -left-4 size-96 bg-pink-500 opacity-20 blur-[100px]" />
+      <div className="absolute bottom-0 -right-4 size-96 bg-cyan-500 opacity-20 blur-[100px]" />
+      <Routes>
+        <Route path="/" element={<ChatPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+      </Routes>
+    </div>
   );
 }
 
