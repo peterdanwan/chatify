@@ -19,7 +19,6 @@ body {
   -webkit-font-smoothing: antialiased;
   /* Support system color schemes while ensuring text remains visible */
   color-scheme: light dark;
-  color: black;
 }
 
 /* 4. Ensure media elements are constrained within their containers */
