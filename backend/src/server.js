@@ -6,6 +6,7 @@ import stoppable from 'stoppable';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 /* Run dotEnv config before all other files that require env variables */
 import '#config/dotEnv.js';
@@ -34,6 +35,9 @@ const PORT = process.env.PORT || 5001;
 // Lets each route parse the body of a request and access it through req.body
 // By default limit is 50kb
 app.use(express.json({ limit: '5MB' }));
+
+// Allows the frontend to send cookies to our backend
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 
 // The cookie-parser middleware lets each route read/parse the cookies
 // from the 'Cookie' header of a request and makes the cookies accessible through "req.cookies".
