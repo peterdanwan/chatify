@@ -2,6 +2,7 @@
 
 import { Route, Routes, Navigate } from 'react-router';
 import { useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 import PageLoader from './components/PageLoader';
 import ChatPage from './pages/ChatPage';
@@ -51,6 +52,7 @@ function App() {
         {/* Redirect users to the home page when authenticated */}
         <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />} />
       </Routes>
+      <Toaster />
     </div>
   );
 }
