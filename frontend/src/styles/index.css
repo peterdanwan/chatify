@@ -30,7 +30,7 @@
 }
 
 .auth-btn {
-  @apply w-full bg-cyan-500 text-white rounded-lg py-2.5 font-medium hover:bg-cyan-600 focus:ring-2 focus:ring-cyan-500;
+  @apply w-full bg-cyan-500 text-white rounded-lg py-2.5 font-medium cursor-pointer hover:bg-cyan-600 focus:ring-2 focus:ring-cyan-500;
 }
 
 .auth-link {
