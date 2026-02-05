@@ -31,6 +31,10 @@ export const useAuthStore = create((set) => ({
   // Should be set to false by default
   isSigningUp: false,
 
+  // A loading state regarding if we're in the process of sending a request to log in
+  // Should be set to false by default
+  isLoggingIn: false,
+
   // Run this function to check if the user is authenticated.
   // This sets the authUser object and isCheckingAuth to false.
   checkAuth: async () => {
@@ -75,6 +79,32 @@ export const useAuthStore = create((set) => ({
       console.error(error);
     } finally {
       set({ isSigningUp: false });
+    }
+  },
+
+  login: async (data) => {
+    set({ isLoggingIn: true });
+    try {
+      const res = await axiosInstance.post('/auth/login', data);
+      set({ authUser: res.data });
+
+      toast.success('Logged in successfully');
+    } catch (error) {
+      // Extract error message with fallback chain:
+      // 1. Server error message (error.response.data.message)
+      // 2. Generic error message (error.message)
+      // 3. Default fallback message
+      // Uses ?. (optional chaining) to safely access nested properties
+      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
+      const msg =
+        error?.response?.data?.message ??
+        error?.message ??
+        'Something went wrong. Please try again.';
+
+      toast.error(msg);
+      console.error(error);
+    } finally {
+      set({ isLoggingIn: false });
     }
   },
 }));
