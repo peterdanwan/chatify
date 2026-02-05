@@ -1,0 +1,82 @@
+/* 1. Use a more-intuitive box-sizing model that maintains declared element dimensions */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove default spacing */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* 3. Configure body defaults */
+body {
+  /* Set accessible default line height for better readability */
+  line-height: 1.5;
+  /* Enable font anti-aliasing for smoother text */
+  -webkit-font-smoothing: antialiased;
+  /* Support system color schemes while ensuring text remains visible */
+  color-scheme: light dark;
+}
+
+/* 4. Ensure media elements are constrained within their containers */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+/* 5. Maintain consistent typography across form elements */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 6. Improve button usability */
+button {
+  /* Prevent button text from wrapping awkwardly */
+  min-width: fit-content;
+  /* Remove default outline while maintaining accessibility */
+  outline-color: transparent;
+}
+
+/* 7. Prevent text from overflowing containers */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* 8. Optimize text wrapping for different content types */
+p {
+  /* Enhance paragraph readability with smart text wrapping */
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* Balance heading text for better visual appearance */
+  text-wrap: balance;
+}
+
+/* 9. Create a root stacking context for proper z-index handling */
+#root,
+#__next {
+  isolation: isolate;
+}

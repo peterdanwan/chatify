@@ -1,0 +1,80 @@
+// frontend/src/store/useAuthStore.js
+
+/**
+ * Zustand functions as a box that stores several different states.
+ * For example:
+ * 1. Loading State
+ * 2. Your Name
+ * 3. A function
+ *
+ * In our application, we can use it in our pages or within our components without prop-drilling.
+ */
+
+import { create } from 'zustand';
+import { axiosInstance } from '../lib/axios';
+import toast from 'react-hot-toast';
+
+// Creating a hook:
+// create(set, get)
+// We use set more than get
+export const useAuthStore = create((set) => ({
+  // State of the auth user.
+  // Once we check if the user is authenticated, we can set the state with the User object.
+  authUser: null,
+
+  // A loading state regarding if we're checking the auth
+  // Should be set to true by default (so that when we refresh a page, we check for this)
+  // Once we do check, set to false
+  isCheckingAuth: true,
+
+  // A loading state regarding if we're in the process of sending a request to sign up
+  // Should be set to false by default
+  isSigningUp: false,
+
+  // Run this function to check if the user is authenticated.
+  // This sets the authUser object and isCheckingAuth to false.
+  checkAuth: async () => {
+    try {
+      // If the request fails, the browser logs its own message, something like:
+      // GET http://localhost:3000/api/auth/check 401 (Unauthorized) useAuthStore.js:35
+      const res = await axiosInstance.get('/auth/check');
+
+      // Runs when there is a success status, e.g.: 2xx
+      set({ authUser: res.data });
+    } catch (error) {
+      // Runs for 4xx, 5xx, etc.
+      // Logs something like:
+      // AxiosError: Request failed with status code 401 at async checkAuth useAuthStore.js:36:19
+      console.error(error);
+      set({ authUser: null });
+    } finally {
+      set({ isCheckingAuth: false });
+    }
+  },
+
+  signup: async (data) => {
+    set({ isSigningUp: true });
+    try {
+      const res = await axiosInstance.post('/auth/signup', data);
+      set({ authUser: res.data });
+
+      toast.success('Account created successfully!');
+    } catch (error) {
+      // Extract error message with fallback chain:
+      // 1. Server error message (error.response.data.message)
+      // 2. Generic error message (error.message)
+      // 3. Default fallback message
+      // Uses ?. (optional chaining) to safely access nested properties
+      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
+      const msg =
+        error?.response?.data?.message ??
+        error?.message ??
+        'Something went wrong. Please try again.';
+
+      toast.error(msg);
+      console.error(error);
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+}));
