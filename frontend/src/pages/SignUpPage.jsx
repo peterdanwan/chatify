@@ -6,6 +6,7 @@ import { MessageCircleIcon, LockIcon, MailIcon, UserIcon, LoaderIcon } from 'luc
 import FormInput from '../components/FormInput';
 import { useAuthStore } from '../store/useAuthStore';
 import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
+import SubmitButton from '../components/SubmitButton';
 
 function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -24,14 +25,6 @@ function SignUpPage() {
 
   const handleInputChange = (event, fieldName) => {
     setFormData({ ...formData, [fieldName]: event.target.value });
-  };
-
-  const submitButtonText = () => {
-    return isSigningUp ? (
-      <LoaderIcon className="w-full h-5 animate-spin text-center" />
-    ) : (
-      'Create Account'
-    );
   };
 
   return (
@@ -94,7 +87,7 @@ function SignUpPage() {
                         id="password"
                         type="password"
                         value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onChange={(e) => handleInputChange(e, 'password')}
                         className="input"
                         placeholder="Enter your password"
                       />
@@ -102,10 +95,7 @@ function SignUpPage() {
                   </div>
 
                   {/* Submit Button */}
-                  <button type="submit" className="auth-btn" disabled={isSigningUp}>
-                    {/* Submit Button Text vs. Submit Button Loading Icon */}
-                    {submitButtonText()}
-                  </button>
+                  <SubmitButton loadingState={isSigningUp}>Create Account</SubmitButton>
                 </form>
 
                 <div className="text-center mt-4">
