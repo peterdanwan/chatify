@@ -35,6 +35,10 @@ export const useAuthStore = create((set) => ({
   // Should be set to false by default
   isLoggingIn: false,
 
+  // A loading state regarding if we're in the process of sending a request to log in
+  // Should be set to false by default
+  isLoggingOut: false,
+
   // Run this function to check if the user is authenticated.
   // This sets the authUser object and isCheckingAuth to false.
   checkAuth: async () => {
@@ -109,7 +113,8 @@ export const useAuthStore = create((set) => ({
   },
 
   logout: async () => {
-    // Note how we don't have the "isLoggingOut" state because this is very quick.
+    set({ isLoggingOut: true });
+
     try {
       await axiosInstance.post('/auth/logout');
       set({ authUser: null });
@@ -130,7 +135,7 @@ export const useAuthStore = create((set) => ({
       toast.error(msg);
       console.error(error);
     } finally {
-      set({ isLoggingIn: false });
+      set({ isLoggingOut: false });
     }
   },
 }));
