@@ -33,6 +33,9 @@ export const sendWelcomeEmail = async (email, name, clientURL) => {
   });
 
   if (error) {
+    // One error might be:
+    // You can only send testing emails to your own email address (YOUR_EMAIL@mail.com).
+    // To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.
     log.error(error, 'Error sending welcome email:');
     throw new Error('Failed to send welcome email');
   }
