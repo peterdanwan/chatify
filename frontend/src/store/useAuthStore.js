@@ -107,4 +107,30 @@ export const useAuthStore = create((set) => ({
       set({ isLoggingIn: false });
     }
   },
+
+  logout: async () => {
+    // Note how we don't have the "isLoggingOut" state because this is very quick.
+    try {
+      await axiosInstance.post('/auth/logout');
+      set({ authUser: null });
+
+      toast.success('Logged out successfully');
+    } catch (error) {
+      // Extract error message with fallback chain:
+      // 1. Server error message (error.response.data.message)
+      // 2. Generic error message (error.message)
+      // 3. Default fallback message
+      // Uses ?. (optional chaining) to safely access nested properties
+      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
+      const msg =
+        error?.response?.data?.message ??
+        error?.message ??
+        'Something went wrong. Please try again.';
+
+      toast.error(msg);
+      console.error(error);
+    } finally {
+      set({ isLoggingIn: false });
+    }
+  },
 }));
