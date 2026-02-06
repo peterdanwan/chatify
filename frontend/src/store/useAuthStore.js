@@ -13,6 +13,8 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
+import { useChatStore } from './useChatStore';
+import { safeErrorMessage } from '../lib/utils';
 
 // Creating a hook:
 // create(set, get)
@@ -49,6 +51,9 @@ export const useAuthStore = create((set) => ({
 
       // Runs when there is a success status, e.g.: 2xx
       set({ authUser: res.data });
+
+      // Initialize chat preferences (e.g., sounds) from user data
+      useChatStore.getState().initializePreferences(res.data);
     } catch (error) {
       // Runs for 4xx, 5xx, etc.
       // Logs something like:
@@ -68,18 +73,8 @@ export const useAuthStore = create((set) => ({
 
       toast.success('Account created successfully!');
     } catch (error) {
-      // Extract error message with fallback chain:
-      // 1. Server error message (error.response.data.message)
-      // 2. Generic error message (error.message)
-      // 3. Default fallback message
-      // Uses ?. (optional chaining) to safely access nested properties
-      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
-      const msg =
-        error?.response?.data?.message ??
-        error?.message ??
-        'Something went wrong. Please try again.';
-
-      toast.error(msg);
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       set({ isSigningUp: false });
@@ -92,20 +87,13 @@ export const useAuthStore = create((set) => ({
       const res = await axiosInstance.post('/auth/login', data);
       set({ authUser: res.data });
 
+      // Initialize preferences after login
+      useChatStore.getState().initializePreferences(res.data);
+
       toast.success('Logged in successfully');
     } catch (error) {
-      // Extract error message with fallback chain:
-      // 1. Server error message (error.response.data.message)
-      // 2. Generic error message (error.message)
-      // 3. Default fallback message
-      // Uses ?. (optional chaining) to safely access nested properties
-      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
-      const msg =
-        error?.response?.data?.message ??
-        error?.message ??
-        'Something went wrong. Please try again.';
-
-      toast.error(msg);
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       set({ isLoggingIn: false });
@@ -121,18 +109,8 @@ export const useAuthStore = create((set) => ({
 
       toast.success('Logged out successfully');
     } catch (error) {
-      // Extract error message with fallback chain:
-      // 1. Server error message (error.response.data.message)
-      // 2. Generic error message (error.message)
-      // 3. Default fallback message
-      // Uses ?. (optional chaining) to safely access nested properties
-      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
-      const msg =
-        error?.response?.data?.message ??
-        error?.message ??
-        'Something went wrong. Please try again.';
-
-      toast.error(msg);
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       set({ isLoggingOut: false });
