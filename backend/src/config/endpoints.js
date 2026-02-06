@@ -15,6 +15,7 @@ export const ENDPOINTS = {
     LOGIN: '/login',
     LOGOUT: '/logout',
     UPDATE_PROFILE: '/update-profile',
+    PREFERENCES: '/preferences',
   },
 
   // Message endpoints
