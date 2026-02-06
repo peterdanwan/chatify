@@ -17,7 +17,7 @@ import cloudinary from '#lib/cloudinary.js';
 
 const log = createLogger(import.meta.url);
 const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.AUTH;
-const { SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE } = ENDPOINTS;
+const { SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS;
 
 // Ref: https://mongoosejs.com/docs/api/model.html
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
@@ -254,6 +254,30 @@ export const updateProfile = async (req, res) => {
     res.status(201).json(updatedUser);
   } catch (error) {
     log.error(error, 'Error in updateProfile controller');
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updatePreferences = async (req, res) => {
+  log.info(`'${ENDPOINT_PREFIX}/${PREFERENCES}' (PUT) endpoint reached`);
+
+  try {
+    const { enableSound } = req.body;
+    const userId = req.user._id;
+
+    if (typeof enableSound !== 'boolean') {
+      log.warn('Invalid preference value');
+      return res.status(400).json({ message: 'enableSound must be a boolean' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, { enableSound }, { new: true }).select(
+      '-password'
+    );
+
+    log.info({ userId, enableSound }, 'User preferences updated');
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    log.error(error, 'Error in updatePreferences controller');
     res.status(500).json({ message: 'Internal server error' });
   }
 };
