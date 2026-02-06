@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    enableSound: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true } // createdAt (member since...) + updatedAt (last login...)
 );
