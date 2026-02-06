@@ -3,7 +3,14 @@
 import express from 'express';
 import { createLogger } from '#config/logger.js';
 import { ENDPOINTS } from '#config/endpoints.js';
-import { signup, login, logout, deleteUser, updateProfile } from '#controllers/auth.controller.js';
+import {
+  signup,
+  login,
+  logout,
+  deleteUser,
+  updateProfile,
+  updatePreferences,
+} from '#controllers/auth.controller.js';
 
 import { protectRoute } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
@@ -11,7 +18,7 @@ import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 const log = createLogger(import.meta.url);
 
 const router = express.Router();
-const { SIGNUP, LOGIN, LOGOUT, UPDATE_PROFILE, DELETE_USER, CHECK } = ENDPOINTS.AUTH;
+const { SIGNUP, LOGIN, LOGOUT, UPDATE_PROFILE, DELETE_USER, PREFERENCES, CHECK } = ENDPOINTS.AUTH;
 
 // RATE LIMITED PROTECTED ROUTES (via ARCJET):
 // -------------------------------------------
@@ -54,6 +61,7 @@ router.post(LOGOUT, logout);
 //   - router.put('/check', protectRoute, (req, res) => res.status(200).json(req.user));
 // Ref: https://expressjs.com/en/api.html#middleware-callback-function-examples
 router.use(protectRoute);
+router.put(PREFERENCES, updatePreferences);
 router.put(UPDATE_PROFILE, updateProfile);
 router.delete(DELETE_USER, deleteUser);
 router.get(CHECK, (req, res) => res.status(200).json(req.user));
