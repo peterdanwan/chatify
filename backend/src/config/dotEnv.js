@@ -161,7 +161,7 @@ const ENV_VARS = {
     description:
       'Cloudinary API key - makes a connection string with CLOUDINARY_CLOUD_NAME and CLOUDINARY_SECRET',
   },
-  CLOUDINARY_SECRET: {
+  CLOUDINARY_API_SECRET: {
     required: true,
     description:
       'Cloudinary Secret - makes a connection string with CLOUDINARY_CLOUD_NAME and CLOUDINARY_SECRET',
