@@ -15,7 +15,7 @@ export const useChatStore = create((set, get) => ({
   isMessagesLoading: false,
 
   // Initialize from localStorage (cache), will be overwritten by DB value on load
-  isSoundEnabled: localStorage.getItem('isSoundEnabled') === true,
+  isSoundEnabled: JSON.parse(localStorage.getItem('isSoundEnabled')) === true,
 
   // Initialize user preferences from database
   initializePreferences: (user) => {
@@ -44,9 +44,6 @@ export const useChatStore = create((set, get) => ({
       localStorage.setItem('isSoundEnabled', !newValue);
       toast.error('Failed to save preference');
     }
-
-    localStorage.setItem('isSoundEnabled', !get().isSoundEnabled);
-    set({ isSoundEnabled: !get().isSoundEnabled });
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
