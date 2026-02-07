@@ -41,6 +41,9 @@ export const useAuthStore = create((set) => ({
   // Should be set to false by default
   isLoggingOut: false,
 
+  // A loading state for when the user is updating their profile picture
+  isUpdatingProfile: false,
+
   // Run this function to check if the user is authenticated.
   // This sets the authUser object and isCheckingAuth to false.
   checkAuth: async () => {
@@ -58,7 +61,7 @@ export const useAuthStore = create((set) => ({
       // Runs for 4xx, 5xx, etc.
       // Logs something like:
       // AxiosError: Request failed with status code 401 at async checkAuth useAuthStore.js:36:19
-      console.error(error);
+      console.error('Error in authCheck:', error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -75,7 +78,7 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
-      console.error(error);
+      console.error('Error with signup', error);
     } finally {
       set({ isSigningUp: false });
     }
@@ -94,7 +97,7 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
-      console.error(error);
+      console.error('Error with login', error);
     } finally {
       set({ isLoggingIn: false });
     }
@@ -111,9 +114,24 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
-      console.error(error);
+      console.error('Error with logout', error);
     } finally {
       set({ isLoggingOut: false });
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true });
+
+    try {
+      const res = await axiosInstance.put('/auth/update-profile', data);
+      set({ authUser: res.data });
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with logout', error);
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));
