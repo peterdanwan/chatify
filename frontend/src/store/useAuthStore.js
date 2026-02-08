@@ -13,6 +13,8 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
+import { useChatStore } from './useChatStore';
+import { safeErrorMessage } from '../lib/utils';
 
 // Creating a hook:
 // create(set, get)
@@ -39,6 +41,9 @@ export const useAuthStore = create((set) => ({
   // Should be set to false by default
   isLoggingOut: false,
 
+  // A loading state for when the user is updating their profile picture
+  isUpdatingProfile: false,
+
   // Run this function to check if the user is authenticated.
   // This sets the authUser object and isCheckingAuth to false.
   checkAuth: async () => {
@@ -49,64 +54,50 @@ export const useAuthStore = create((set) => ({
 
       // Runs when there is a success status, e.g.: 2xx
       set({ authUser: res.data });
+
+      // Initialize chat preferences (e.g., sounds) from user data
+      useChatStore.getState().initializePreferences(res.data);
     } catch (error) {
       // Runs for 4xx, 5xx, etc.
       // Logs something like:
       // AxiosError: Request failed with status code 401 at async checkAuth useAuthStore.js:36:19
-      console.error(error);
+      console.error('Error in authCheck:', error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
     }
   },
 
-  signup: async (data) => {
+  signup: async (credentials) => {
     set({ isSigningUp: true });
     try {
-      const res = await axiosInstance.post('/auth/signup', data);
+      const res = await axiosInstance.post('/auth/signup', credentials);
       set({ authUser: res.data });
 
       toast.success('Account created successfully!');
     } catch (error) {
-      // Extract error message with fallback chain:
-      // 1. Server error message (error.response.data.message)
-      // 2. Generic error message (error.message)
-      // 3. Default fallback message
-      // Uses ?. (optional chaining) to safely access nested properties
-      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
-      const msg =
-        error?.response?.data?.message ??
-        error?.message ??
-        'Something went wrong. Please try again.';
-
-      toast.error(msg);
-      console.error(error);
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with signup', error);
     } finally {
       set({ isSigningUp: false });
     }
   },
 
-  login: async (data) => {
+  login: async (credentials) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post('/auth/login', data);
+      const res = await axiosInstance.post('/auth/login', credentials);
       set({ authUser: res.data });
+
+      // Initialize preferences after login
+      useChatStore.getState().initializePreferences(res.data);
 
       toast.success('Logged in successfully');
     } catch (error) {
-      // Extract error message with fallback chain:
-      // 1. Server error message (error.response.data.message)
-      // 2. Generic error message (error.message)
-      // 3. Default fallback message
-      // Uses ?. (optional chaining) to safely access nested properties
-      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
-      const msg =
-        error?.response?.data?.message ??
-        error?.message ??
-        'Something went wrong. Please try again.';
-
-      toast.error(msg);
-      console.error(error);
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with login', error);
     } finally {
       set({ isLoggingIn: false });
     }
@@ -121,21 +112,26 @@ export const useAuthStore = create((set) => ({
 
       toast.success('Logged out successfully');
     } catch (error) {
-      // Extract error message with fallback chain:
-      // 1. Server error message (error.response.data.message)
-      // 2. Generic error message (error.message)
-      // 3. Default fallback message
-      // Uses ?. (optional chaining) to safely access nested properties
-      // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
-      const msg =
-        error?.response?.data?.message ??
-        error?.message ??
-        'Something went wrong. Please try again.';
-
-      toast.error(msg);
-      console.error(error);
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with logout', error);
     } finally {
       set({ isLoggingOut: false });
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true });
+
+    try {
+      const res = await axiosInstance.put('/auth/update-profile', data);
+      set({ authUser: res.data });
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with logout', error);
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));
