@@ -3,6 +3,7 @@
 // import { useAuthStore } from '../store/useAuthStore';
 import ActiveTabSwitch from '../components/ActiveTabSwitch';
 import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
+import ChatContainer from '../components/ChatContainer';
 import ChatsList from '../components/ChatsList';
 import ContactsList from '../components/ContactsList';
 import NoConversationPlaceholder from '../components/NoConversationPlaceholder';
