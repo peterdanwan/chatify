@@ -17,7 +17,7 @@ import cloudinary from '#lib/cloudinary.js';
 
 const log = createLogger(import.meta.url);
 const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.AUTH;
-const { SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS;
+const { SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS.AUTH;
 
 // Ref: https://mongoosejs.com/docs/api/model.html
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
