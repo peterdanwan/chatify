@@ -8,10 +8,10 @@ import { User } from '#models/User.js';
 
 const log = createLogger(import.meta.url);
 const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.MESSAGES;
-const { CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS;
+const { CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
 
 export const getAllContacts = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${CONTACTS}' (GET) endpoint reached`);
+  log.info(`'${ENDPOINT_PREFIX}${CONTACTS}' (GET) endpoint reached`);
   try {
     // .id return a string representation of _id (i.e., _id.toString())
     //   e.g.: '507f1f77bcf86cd799439011'
@@ -32,10 +32,10 @@ export const getAllContacts = async (req, res) => {
 };
 
 export const getChatPartners = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${CHATS}' (GET) endpoint reached`);
+  log.info(`'${ENDPOINT_PREFIX}${CHATS}' (GET) endpoint reached`);
 
   try {
-    const loggedInUserId = req.user_id;
+    const loggedInUserId = req.user._id;
     const loggedInUserName = `${req.user.firstName} ${req.user.lastName}`;
 
     // Find all the messages where the logged-in user is either the sender or the receiver
@@ -72,7 +72,7 @@ export const getChatPartners = async (req, res) => {
 };
 
 export const getMessagesByUserId = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${BY_USER_ID}' (GET) endpoint reached`);
+  log.info(`'${ENDPOINT_PREFIX}${BY_USER_ID}' (GET) endpoint reached`);
 
   // Obtain req.user from our "protectRoute" middleware
   const myId = req.user._id;
@@ -101,7 +101,7 @@ export const getMessagesByUserId = async (req, res) => {
 };
 
 export const sendMessage = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${SEND_TO_ID}' (POST) endpoint reached`);
+  log.info(`'${ENDPOINT_PREFIX}${SEND_TO_ID}' (POST) endpoint reached`);
 
   try {
     const { text, image } = req.body;
