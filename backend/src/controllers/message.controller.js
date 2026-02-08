@@ -38,9 +38,11 @@ export const getChatPartners = async (req, res) => {
     const loggedInUserId = req.user._id;
     const loggedInUserName = `${req.user.firstName} ${req.user.lastName}`;
 
+    log.debug(`Getting chat partners for ${loggedInUserName} (User ID: ${loggedInUserId})`);
+
     // Find all the messages where the logged-in user is either the sender or the receiver
     const messages = await Message.find({
-      $or: [{ senderId: loggedInUserId, receiverId: loggedInUserId }],
+      $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }],
     });
 
     // Using the retrieved messages, build an array of ids that are NOT the loggedInUserId (i.e., the chatPartnerIds)
@@ -50,7 +52,7 @@ export const getChatPartners = async (req, res) => {
     const uniqueChatPartnerIds = [
       ...new Set(
         messages.map((message) =>
-          message.senderId.toString() === loggedInUserId
+          message.senderId.toString() === loggedInUserId.toString()
             ? message.receiverId.toString()
             : message.senderId.toString()
         )
