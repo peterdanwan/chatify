@@ -68,10 +68,10 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  signup: async (data) => {
+  signup: async (credentials) => {
     set({ isSigningUp: true });
     try {
-      const res = await axiosInstance.post('/auth/signup', data);
+      const res = await axiosInstance.post('/auth/signup', credentials);
       set({ authUser: res.data });
 
       toast.success('Account created successfully!');
@@ -84,10 +84,10 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  login: async (data) => {
+  login: async (credentials) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post('/auth/login', data);
+      const res = await axiosInstance.post('/auth/login', credentials);
       set({ authUser: res.data });
 
       // Initialize preferences after login
