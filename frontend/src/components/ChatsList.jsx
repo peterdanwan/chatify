@@ -29,15 +29,16 @@ function ChatsList() {
           onClick={() => setSelectedUser(chat)}
         >
           <div className="flex items-center gap-3">
-            <div className="avatar online">
+            {/* TODO: FIX THIS ONLINE STATUS AND MAKE IT WORK WITH SOCKET */}
+            <div className="avatar avatar-online ">
               <div className="size-12 rounded-full">
                 <img
                   src={chat.profilePic || '/avatar.png'}
                   alt={`${chat.firstName} ${chat.lastName}`}
                 />
               </div>
-              <h4 className="text-slate-200 font-medium truncate">{`${chat.firstName} ${chat.lastName}`}</h4>
             </div>
+            <h4 className="text-slate-200 font-medium truncate">{`${chat.firstName} ${chat.lastName}`}</h4>
           </div>
         </div>
       ))}
