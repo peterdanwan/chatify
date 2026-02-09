@@ -22,24 +22,28 @@ function ChatContainer() {
       <div className="flex-1 px-6 overflow-y-auto py-8">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-6">
-            {messages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? 'chat-end' : 'chat-start'}`}
-              >
+            {[...messages]
+              .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+              // OLD: MongoDB does sort by chronological order, but we will use the sort method to ensure this is the case.
+              // {messages.map((msg) => (
+              .map((msg) => (
                 <div
-                  className={`chat-bubble relative ${msg.senderId === authUser._id ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-200'}`}
+                  key={msg._id}
+                  className={`chat ${msg.senderId === authUser._id ? 'chat-end' : 'chat-start'}`}
                 >
-                  {msg.image && (
-                    <img src={msg.image} alt="Shared" className="rounded-lg h-8 object-cover" />
-                  )}
-                  {msg.text && <p className="mt-1">{msg.text}</p>}
-                  <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
-                    {new Date(msg.createdAt).toISOString().slice(11, 16)}
-                  </p>
+                  <div
+                    className={`chat-bubble relative ${msg.senderId === authUser._id ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-200'}`}
+                  >
+                    {msg.image && (
+                      <img src={msg.image} alt="Shared" className="rounded-lg h-8 object-cover" />
+                    )}
+                    {msg.text && <p className="mt-1">{msg.text}</p>}
+                    <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
+                      {new Date(msg.createdAt).toISOString().slice(11, 16)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         ) : isMessagesLoading ? (
           <MessagesLoadingSkeleton />
