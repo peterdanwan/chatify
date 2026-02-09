@@ -94,8 +94,9 @@ export const getMessagesByUserId = async (req, res) => {
     });
 
     log.debug({ messages }, 'Retrieved messages between sender and recipient');
-
     log.info('Found Message');
+
+    res.status(200).json(messages);
   } catch (error) {
     log.error(error, 'Error in getMessagesByUserId controller');
     res.status(500).json({ error: 'Internal server error' });
