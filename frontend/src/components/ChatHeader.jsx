@@ -19,7 +19,10 @@ export default function ChatHeader() {
   }, [setSelectedUser]);
 
   return (
-    <div className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-21 px-6 flex-1">
+    <div
+      id="chat-header"
+      className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-21 px-6 flex-1"
+    >
       <div className="flex items-center space-x-3 ">
         <div className="avatar avatar-online">
           <div className="w-12 rounded-full">
