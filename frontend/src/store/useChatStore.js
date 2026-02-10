@@ -11,8 +11,8 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   activeTab: 'chats', // vs. "contacts"
   selectedUser: null,
-  isUserLoading: false,
-  isMessagesLoading: false,
+  isUserLoading: false, // used in ChatsList.jsx & ContactsList.jsx
+  isMessagesLoading: false, // used in ChatContainer.jsx
 
   // Initialize from localStorage (cache), will be overwritten by DB value on load
   isSoundEnabled: JSON.parse(localStorage.getItem('isSoundEnabled')) === true,
