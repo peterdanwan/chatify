@@ -7,7 +7,6 @@ function ChatMessage({ msg }) {
 
   return (
     <div
-      key={msg._id}
       className={`chat-message chat ${msg.senderId === authUser._id ? 'chat-end' : 'chat-start'}`}
     >
       <div

@@ -22,7 +22,7 @@ export default function ChatBody() {
             // OLD: MongoDB does sort by chronological order, but we will use the sort method to ensure this is the case.
             // {messages.map((msg) => (
             .map((msg) => (
-              <ChatMessage msg={msg} />
+              <ChatMessage msg={msg} key={msg._id} />
             ))}
         </div>
       ) : isMessagesLoading ? (
