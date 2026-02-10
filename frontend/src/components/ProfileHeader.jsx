@@ -12,6 +12,8 @@ function ProfileHeader() {
   const { logout, authUser, updateProfile, isUpdatingProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImage, setSelectedImage] = useState(null);
+
+  // Ref: https://react.dev/reference/react/useRef
   const fileInputRef = useRef(null);
 
   // PW: common way of uploading images
