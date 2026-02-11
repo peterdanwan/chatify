@@ -22,7 +22,7 @@ function ChatPage() {
           <ActiveTabSwitch />
 
           {/* Container that shows Chats or Contacts  */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div id="chats-or-contacts-container" className="flex-1 overflow-y-auto p-4 space-y-2">
             {activeTab === 'chats' ? <ChatsList /> : <ContactsList />}
           </div>
         </div>
