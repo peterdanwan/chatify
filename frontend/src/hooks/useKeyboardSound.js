@@ -10,7 +10,7 @@ const keyStrokeSounds = [
 // Lets us play a random sound when we press a key
 function useKeyboardSound() {
   const playRandomKeyStrokeSound = () => {
-    const randomSound = keyStrokeSounds.Math.floor(Math.random() * keyStrokeSounds.length);
+    const randomSound = keyStrokeSounds[Math.floor(Math.random() * keyStrokeSounds.length)];
 
     // TODO: explain the purpose of the line below
     randomSound.currentTime = 0;
