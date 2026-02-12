@@ -11,15 +11,20 @@
  */
 
 import { create } from 'zustand';
-import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
+
+import { axiosInstance } from '../lib/axios';
 import { useChatStore } from './useChatStore';
 import { safeErrorMessage } from '../lib/utils';
+
+// Same thing as frontend/src/lib/axios.js
+const BASE_URL = import.meta.env.MODE === 'development' ? 'http://localhost:3000' : '/';
 
 // Creating a hook:
 // create(set, get)
 // We use set more than get
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   // State of the auth user.
   // Once we check if the user is authenticated, we can set the state with the User object.
   authUser: null,
@@ -44,6 +49,10 @@ export const useAuthStore = create((set) => ({
   // A loading state for when the user is updating their profile picture
   isUpdatingProfile: false,
 
+  socket: null,
+
+  onlineUsers: [],
+
   // Run this function to check if the user is authenticated.
   // This sets the authUser object and isCheckingAuth to false.
   checkAuth: async () => {
@@ -54,6 +63,8 @@ export const useAuthStore = create((set) => ({
 
       // Runs when there is a success status, e.g.: 2xx
       set({ authUser: res.data });
+
+      get().connectSocket();
 
       // Initialize chat preferences (e.g., sounds) from user data
       useChatStore.getState().initializePreferences(res.data);
@@ -75,6 +86,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
 
       toast.success('Account created successfully!');
+      get().connectSocket();
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
@@ -94,6 +106,8 @@ export const useAuthStore = create((set) => ({
       useChatStore.getState().initializePreferences(res.data);
 
       toast.success('Logged in successfully');
+
+      get().connectSocket();
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
@@ -111,6 +125,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: null });
 
       toast.success('Logged out successfully');
+      get().disconnectSocket();
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
@@ -132,6 +147,36 @@ export const useAuthStore = create((set) => ({
       console.error('Error with logout', error);
     } finally {
       set({ isUpdatingProfile: false });
+    }
+  },
+
+  // Called after a successful signup, when we login, and every time we check our auth (i.e., when we refresh the page)
+  connectSocket: () => {
+    const { authUser } = get();
+
+    // Prevents socket connection for unauthenticated user / if there's a connection for the client already
+    if (!authUser || get().socket?.connected) {
+      return;
+    }
+
+    const socket = io(BASE_URL, {
+      withCredentials: true, // ensurs cookies are sent with the connection
+    });
+
+    socket.connect();
+
+    set({ socket });
+
+    // Listen for online users event
+    socket.on('getOnlineUsers', (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  // Called when we log out
+  disconnectSocket: () => {
+    if (get().socket?.connected) {
+      get().socket?.disconnect();
     }
   },
 }));
