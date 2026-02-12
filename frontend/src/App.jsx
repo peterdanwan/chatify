@@ -34,7 +34,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 relative flex items-center justify-center p-4 overflow-hidden">
+    <div
+      id="app"
+      className="min-h-screen bg-slate-900 relative flex items-center justify-center p-4 overflow-hidden"
+    >
       {/* DECORATORS - GRID BG & GLOW SHAPES in the corner */}
       <div
         // Get AI to help with stuff like this div

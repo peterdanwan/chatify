@@ -5,6 +5,7 @@ import { ENDPOINTS, ENDPOINT_PREFIXES } from '#config/endpoints.js';
 import cloudinary from '#lib/cloudinary.js';
 import { Message } from '#models/Message.js';
 import { User } from '#models/User.js';
+import { validateBase64Image } from '#lib/utils.js';
 
 const log = createLogger(import.meta.url);
 const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.MESSAGES;
@@ -133,6 +134,25 @@ export const sendMessage = async (req, res) => {
     let imageUrl = '';
 
     if (image) {
+      log.debug('Confirming that the image is a valid base64 image...');
+      const validation = await validateBase64Image(image, 5); // 5 MB Limit for message images
+
+      if (!validation.isValid) {
+        log.warn({ error: validation.error }, 'Invalid messasge image');
+        return res.status(400).json({ message: validation.error });
+      }
+
+      if (validation.mismatch) {
+        log.warn(
+          { declaredMimeType: validation.declaredMimeType, actualMimeType: validation.mimeType },
+          'MIME type mismatch detected'
+        );
+
+        // Optional: Reject as a security measure
+        // return res.status(400).json({message: 'File type mismatch detected'});
+      }
+
+      log.debug({ mimeType: validation.mimeType }, 'Valid message image detected');
       // Upload the base64 image to cloudinary
       log.debug('Uploading image to Cloudinary');
       const uploadResponse = await cloudinary.uploader.upload(image);

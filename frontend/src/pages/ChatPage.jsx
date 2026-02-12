@@ -14,21 +14,21 @@ function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
 
   return (
-    <div className="relative w-full max-w-6xl h-200">
+    <div id="chat-page" className="relative w-full max-w-6xl h-200">
       <BorderAnimatedContainer>
         {/* LEFT SIDE */}
-        <div className="w-80 bg-slate-800/50 backdrop-blur-sm flex flex-col">
+        <div id="left-side" className="w-90 bg-slate-800/50 backdrop-blur-sm flex flex-col">
           <ProfileHeader />
           <ActiveTabSwitch />
 
           {/* Container that shows Chats or Contacts  */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div id="chats-or-contacts-container" className="flex-1 overflow-y-auto p-4 space-y-2">
             {activeTab === 'chats' ? <ChatsList /> : <ContactsList />}
           </div>
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="flex-1 flex flex-col bg-slate-900/50 backdroup-blur-sm">
+        <div id="right-side" className="flex-1 flex flex-col bg-slate-900/50 backdroup-blur-sm">
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
       </BorderAnimatedContainer>

@@ -22,7 +22,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-4 bg-slate-900 ">
+    <div id="login-page" className="w-full flex items-center justify-center p-4 bg-slate-900 ">
       {/* Max width is set. height is 650px on small screens, and height is 800px when on medium sized screens and above */}
       {/* h-[560px] replaced with h-162.5 | md:h-[800px] replaced with */}
       <div className="w-full relative max-w-6xl h-162.5 md:h-200">
