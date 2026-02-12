@@ -1,6 +1,7 @@
 // backend/src/lib/utils.js
 
 import jwt from 'jsonwebtoken';
+import { fileTypeFromBuffer } from 'file-type';
 // import mongoose from 'mongoose';
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -98,3 +99,64 @@ export const allStringsAreNotEmpty = (...values) => {
 //     next();
 //   };
 // };
+
+// Ref: https://www.npmjs.com/package/file-type
+export const validateBase64Image = async (base64String, maxSizeInMB = 5) => {
+  if (!base64String || typeof base64String !== 'string') {
+    return { isValid: false, error: 'Invalid image data' };
+  }
+
+  // Extract the base64 data
+  const matches = base64String.match(/^data:([^;]+);base64,(.+)$/);
+
+  if (!matches) {
+    return { isValid: false, error: 'Invalid base64 format' };
+  }
+
+  const declaredMimeType = matches[1];
+  const base64Data = matches[2];
+
+  // Convert to buffer to check actual file type
+  const buffer = Buffer.from(base64Data, 'base64');
+
+  // Detect ACTUAL file type from magic bytes
+  const detectedType = await fileTypeFromBuffer(buffer);
+
+  if (!detectedType) {
+    return { isValid: false, error: 'Could not determine file type' };
+  }
+
+  // Validate it's actually an image
+  const allowedMimeTypes = [
+    'image/jpg',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'image/tiff',
+    'image/bmp',
+  ];
+
+  if (!allowedMimeTypes.includes(detectedType.mime)) {
+    return {
+      isValid: false,
+      error: 'Invalid image type. Allowed: JPG, JPEG, PNG, GIF, WebP, SVG+XML, TIFF, BMP',
+    };
+  }
+
+  // Validate file size
+  const sizeInBytes = buffer.length;
+  const sizeInMB = sizeInBytes / (1024 * 1024);
+
+  if (sizeInMB > maxSizeInMB) {
+    return { isValid: false, error: `Image size exceeds ${maxSizeInMB}MB limit` };
+  }
+
+  return {
+    isValid: true,
+    mimeType: detectedType.mime,
+    declaredMimeType,
+    mismatch: declaredMimeType !== detectedType.mime, // Flag for caller to handle
+  };
+};
