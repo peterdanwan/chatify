@@ -1,10 +1,19 @@
 // frontend/src/components/ProfileHeader.jsx
 
 import { useRef, useState } from 'react';
-import { CircleUserRound, Loader2, LogOutIcon, Volume2Icon, VolumeOffIcon } from 'lucide-react';
+import {
+  CircleUserRound,
+  Loader2,
+  LogOutIcon,
+  SettingsIcon,
+  Volume2Icon,
+  VolumeOffIcon,
+} from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
+import ProfileHeaderButton from './ProfileHeaderButton';
+import Modal from './Modal';
 
 const mouseClickSound = new Audio('/sounds/mouse-click.mp3');
 
@@ -12,6 +21,7 @@ function ProfileHeader() {
   const { logout, authUser, updateProfile, isUpdatingProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Ref: https://react.dev/reference/react/useRef
   const fileInputRef = useRef(null);
@@ -46,10 +56,18 @@ function ProfileHeader() {
     toggleSound();
   };
 
+  const handleSettingsButtonClick = () => {
+    setIsSettingsOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsSettingsOpen(false);
+  };
+
   return (
     <div id="profile-header" className="p-6 border-b border-slate-700/50">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div id="auth-user-info-container" className="flex items-center gap-3">
           {/* AVATAR | Ref: https://daisyui.com/components/avatar/#avatar-with-presence-indicator */}
           <div className="avatar avatar-online">
             <button
@@ -102,28 +120,40 @@ function ProfileHeader() {
         </div>
 
         {/* BUTTONS */}
-        <div className="flex gap-4 items-center">
+        <div id="settings-container" className="flex gap-4 items-center mb-3">
           {/* LOGOUT BUTTON */}
-          <button
-            className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
-            onClick={logout}
-          >
+          <ProfileHeaderButton onClick={logout} dataTip="Logout">
             <LogOutIcon className="size-5" />
-          </button>
+          </ProfileHeaderButton>
 
           {/* SOUND TOGGLE BUTTON */}
-          <button
-            className="text-slate-400 hover:text-slate-300 transition-colors cursor-pointer"
+          <ProfileHeaderButton
             onClick={handleToggleButtonClick}
+            dataTip={isSoundEnabled ? 'Toggle Sound Off' : 'Toggle Sound On'}
           >
             {isSoundEnabled ? (
               <Volume2Icon className="size-5" />
             ) : (
               <VolumeOffIcon className="size-5" />
             )}
-          </button>
+          </ProfileHeaderButton>
+
+          {/* SETTINGS BUTTON */}
+          <ProfileHeaderButton onClick={handleSettingsButtonClick} dataTip="Settings">
+            <SettingsIcon className="size-5" />
+          </ProfileHeaderButton>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <Modal isOpen={isSettingsOpen} onClose={handleCloseModal} title="Settings">
+        <p className="text-slate-400">Configure your preferences below</p>
+
+        {/* TODO: Add settings content here */}
+        <div className="space-y-4 mt-6">
+          {/* e.g., Option to delete user. Change status. etc.*/}
+        </div>
+      </Modal>
     </div>
   );
 }
