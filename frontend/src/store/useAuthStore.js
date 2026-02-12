@@ -153,9 +153,10 @@ export const useAuthStore = create((set, get) => ({
   // Called after a successful signup, when we login, and every time we check our auth (i.e., when we refresh the page)
   connectSocket: () => {
     const { authUser } = get();
+    const existingSocketConnection = get().socket;
 
     // Prevents socket connection for unauthenticated user / if there's a connection for the client already
-    if (!authUser || get().socket?.connected) {
+    if (!authUser || existingSocketConnection?.connected || existingSocketConnection?.active) {
       return;
     }
 
@@ -175,8 +176,15 @@ export const useAuthStore = create((set, get) => ({
 
   // Called when we log out
   disconnectSocket: () => {
-    if (get().socket?.connected) {
-      get().socket?.disconnect();
+    const socketConnection = get().socket;
+
+    if (!socketConnection) {
+      return;
     }
+
+    socketConnection.off('getOnlineUsers');
+    socketConnection.disconnect();
+    // Drop reference and clear presence
+    set({ socket: null, onlineUsers: [] });
   },
 }));
