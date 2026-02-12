@@ -15,6 +15,9 @@ import '#config/dotEnv.js';
 import { createLogger, shutDownLogger } from '#config/logger.js';
 import { ENDPOINT_PREFIXES } from '#config/endpoints.js';
 import { connectDB } from '#lib/db.js';
+
+import { app, server } from '#lib/socket.js';
+
 import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
@@ -26,8 +29,9 @@ const log = createLogger(import.meta.url, true);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* Create our express app */
-const app = express();
+/* OLD: Create our express app. We don't need this anymore because we get an app from socket.js */
+// const app = express();
+
 const PORT = process.env.PORT || 5001;
 
 /* Middleware */
@@ -69,13 +73,13 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-/* Setting up our server */
-let server;
+/* OLD: Setting up our server using a global variable (now we use the server object from socket) */
+// let server;
 
 connectDB()
   .then(() => {
-    server = stoppable(
-      app.listen(PORT, () => {
+    stoppable(
+      server.listen(PORT, () => {
         log.info(`Server listening on port: ${PORT}`);
       })
     );
@@ -108,5 +112,3 @@ const gracefulShutdown = (signal) => {
 /* Listen for termination signals */
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
-export default server;
