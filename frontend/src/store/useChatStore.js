@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { safeErrorMessage } from '../lib/utils';
+import { useAuthStore } from './useAuthStore';
 
 export const useChatStore = create((set, get) => ({
   allContacts: [],
@@ -86,6 +87,42 @@ export const useChatStore = create((set, get) => ({
       toast.error(errorMessage);
     } finally {
       set({ isMessagesLoading: false });
+    }
+  },
+
+  sendMessage: async ({ text, image }) => {
+    // There's a closure for messages
+    const { selectedUser, messages } = get();
+    const { authUser } = useAuthStore.getState();
+    const tempId = `temp-${Date.now()}`;
+
+    // As if we are creating a mock-up message for our database
+    const optimisticMessage = {
+      _id: tempId,
+      senderId: authUser._id,
+      receiverId: selectedUser._id,
+      text,
+      image,
+      createdAt: new Date().toISOString(),
+      isOptimistic: true, // flag to identify optimistic messages (optional)
+    };
+
+    // Immediately updates the UI by adding this message
+    set({ messages: [...messages, optimisticMessage] });
+
+    try {
+      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, { text, image });
+
+      // This code just appends the new message to the messages we see.
+      // set({messages: [...messages, ...res.data]}); <- create a new array made by spreading out the contents of messages and res.data
+      set({ messages: [...messages, res.data] }); // Use original messages + real message
+    } catch (error) {
+      // Using the closure at the top of the file, we reset messages back to the original messages
+      set({ messages: messages });
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+    } finally {
+      //
     }
   },
 }));
