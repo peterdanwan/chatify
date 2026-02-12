@@ -14,7 +14,7 @@ function ChatContainer() {
   }, [selectedUser, getMessagesByUserId]);
 
   return (
-    <div id="chat-container" className="flex flex-col flex-1">
+    <div id="chat-container" className="flex flex-col flex-1 overflow-y-auto">
       <ChatHeader />
       <ChatBody />
       <MessageInput />
