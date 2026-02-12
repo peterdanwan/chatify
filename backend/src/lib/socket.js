@@ -23,8 +23,8 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // This is for storing online users:
-// {userId: socketId}
-const userSocketMap = {};
+// In-memory presence: Map<userId, Set<socketId>>
+const userSocketMap = new Map();
 
 // 1. Detect when someone goes online
 io.on('connection', (socket) => {
@@ -33,17 +33,27 @@ io.on('connection', (socket) => {
   log.info(`${firstName} ${lastName} connected`);
 
   const userId = socket.userId;
-  userSocketMap[userId] = socket.id;
+  const sockets = userSocketMap.get(userId) ?? new Set();
+  sockets.add(socket.id);
+  userSocketMap.set(userId, sockets);
 
   // 2. Use io.emit() to send event(s) + data to all connected clients
-  io.emit('getOnlineUsers', Object.keys(userSocketMap));
+  io.emit('getOnlineUsers', Array.from(userSocketMap.keys()));
 
   // 3. Detect when someone goes offline
   // - With socket.ion, we listen for events from clients
   socket.on('disconnect', () => {
     log.info(`${firstName} ${lastName} disconnected`);
-    delete userSocketMap[userId];
-    io.emit('getOnlineUsers', Object.keys(userSocketMap));
+    const sockets = userSocketMap.get(userId);
+
+    if (sockets) {
+      sockets.delete(socket.id);
+      if (sockets.size === 0) {
+        userSocketMap.delete(userId);
+      }
+    }
+
+    io.emit('getOnlineUsers', Array.from(userSocketMap.keys()));
   });
 });
 
