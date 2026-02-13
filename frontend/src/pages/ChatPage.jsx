@@ -30,7 +30,7 @@ function ChatPage() {
         {/* RIGHT SIDE */}
         <div
           id="right-side"
-          className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm lg:w-2/3"
+          className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm lg:w-2/3 overflow-y-auto"
         >
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
