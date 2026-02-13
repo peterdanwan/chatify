@@ -7,11 +7,15 @@ import ChatBody from './ChatBody';
 import MessageInput from './MessageInput';
 
 function ChatContainer() {
-  const { selectedUser, getMessagesByUserId } = useChatStore();
+  const { selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages } =
+    useChatStore();
 
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
-  }, [selectedUser, getMessagesByUserId]);
+    subscribeToMessages();
+
+    return () => unsubscribeFromMessages();
+  }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages]);
 
   return (
     <div id="chat-container" className="flex flex-col flex-1 overflow-y-auto">
