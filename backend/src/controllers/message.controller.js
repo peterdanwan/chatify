@@ -6,6 +6,7 @@ import cloudinary from '#lib/cloudinary.js';
 import { Message } from '#models/Message.js';
 import { User } from '#models/User.js';
 import { validateBase64Image } from '#lib/utils.js';
+import { getReceiverSocketId, io } from '#lib/socket.js';
 
 const log = createLogger(import.meta.url);
 const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.MESSAGES;
@@ -176,6 +177,11 @@ export const sendMessage = async (req, res) => {
     log.info('New message successfully saved');
 
     // TODO: send message in real-time if user is online via socket.io
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('newMessage', newMessage);
+    }
+
     res.status(201).json(newMessage);
   } catch (error) {
     log.error(error, 'Error with sendMessage controller');
