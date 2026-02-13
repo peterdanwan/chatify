@@ -66,7 +66,7 @@ function ProfileHeader() {
 
   return (
     <div id="profile-header" className="p-6 border-b border-slate-700/50">
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between gap-6">
         <div id="auth-user-info-container" className="flex items-center gap-3">
           {/* AVATAR | Ref: https://daisyui.com/components/avatar/#avatar-with-presence-indicator */}
           <div className="avatar avatar-online">
@@ -111,7 +111,7 @@ function ProfileHeader() {
 
           {/* USERNAME & ONLINE TEXT */}
           <div>
-            <h3 className="text-slate-200 font-medium text-base max-w-45 truncate">
+            <h3 className="text-slate-200 font-medium text-sm small:text-base truncate tooltip tooltip-right max-w-45 ">
               {`${authUser.firstName} ${authUser.lastName}`}
             </h3>
 

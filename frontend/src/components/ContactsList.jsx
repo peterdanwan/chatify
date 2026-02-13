@@ -27,11 +27,11 @@ function ContactsList() {
       {allContacts.map((contact) => (
         <button
           key={contact._id}
-          className="w-full bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
+          className="w-full bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors tooltip tooltip-info tooltip-bottom"
           onClick={() => setSelectedUser(contact)}
+          data-tip={`${contact.firstName} ${contact.lastName}`}
         >
           <div className="flex items-center gap-3">
-            {/* TODO: FIX THIS ONLINE STATUS AND MAKE IT WORK WITH SOCKET */}
             <div
               className={`avatar ${onlineUsers.includes(contact._id) ? 'avatar-online' : 'avatar-offline'}`}
             >

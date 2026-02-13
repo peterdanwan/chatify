@@ -2,11 +2,12 @@
 
 export default function ProfileHeaderButton({ onClick, dataTip, children }) {
   return (
-    <div className="tooltip tooltip-bottom tooltip-info bg-transparent pt-2" data-tip={dataTip}>
+    <div className="bg-transparent pt-2">
       <button
-        className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+        className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer tooltip tooltip-bottom tooltip-info"
         onClick={onClick}
         type="button"
+        data-tip={dataTip}
       >
         {children}
       </button>
