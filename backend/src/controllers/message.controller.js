@@ -176,10 +176,12 @@ export const sendMessage = async (req, res) => {
 
     log.info('New message successfully saved');
 
-    // TODO: send message in real-time if user is online via socket.io
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('newMessage', newMessage);
+    // Sets up real-time message delivery via socket.io
+    const receiverSocketIds = getReceiverSocketId(receiverId);
+    if (receiverSocketIds && receiverSocketIds.size > 0) {
+      receiverSocketIds.forEach((socketId) => {
+        io.to(socketId).emit('newMessage', newMessage);
+      });
     }
 
     res.status(201).json(newMessage);
