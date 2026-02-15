@@ -26,7 +26,7 @@ export default function ChatHeader() {
   return (
     <div
       id="chat-header"
-      className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-21 px-1 flex-1"
+      className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-21 flex-1"
     >
       <div className="flex items-center gap-2 pl-4 ">
         <div className={`avatar ${isOnline ? 'avatar-online' : 'avatar-offline'}`}>
