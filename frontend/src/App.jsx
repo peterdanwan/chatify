@@ -36,17 +36,16 @@ function App() {
   return (
     <div
       id="app"
-      className="min-h-screen bg-slate-900 relative flex items-center justify-center p-4 overflow-hidden"
+      className="h-dvh lg:h-auto lg:min-h-screen bg-slate-900 relative flex items-center justify-center p-0 lg:p-4"
     >
-      {/* DECORATORS - GRID BG & GLOW SHAPES in the corner */}
+      {/* DECORATORS - GRID BG & GLOW SHAPES in the corner (hidden on mobile) */}
       <div
-        // Get AI to help with stuff like this div
-        className="absolute inset-0 
+        className="absolute inset-0 hidden lg:block
         bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)]
         bg-size-[14px_24px]"
       />
-      <div className="absolute top-0 -left-4 size-96 bg-pink-500 opacity-20 blur-[100px]" />
-      <div className="absolute bottom-0 -right-4 size-96 bg-cyan-500 opacity-20 blur-[100px]" />
+      <div className="absolute top-0 -left-4 size-96 bg-pink-500 opacity-20 blur-[100px] hidden lg:block" />
+      <div className="absolute bottom-0 -right-4 size-96 bg-cyan-500 opacity-20 blur-[100px] hidden lg:block" />
       <Routes>
         {/* Redirect users to the login page when not authenticated */}
         <Route path="/" element={authUser ? <ChatPage /> : <Navigate to={'/login'} />} />
