@@ -5,7 +5,7 @@ function NoConversationPlaceholder() {
   return (
     <div
       id="no-conversation-placeholder"
-      className="flex flex-col items-center justify-center h-full text-center p-6"
+      className="flex flex-col items-center justify-center text-center p-6"
     >
       <div className="size-20 bg-cyan-500/20 rounded-full flex items-center justify-center mb-6">
         <MessageCircleIcon className="size-10 text-cyan-400" />
