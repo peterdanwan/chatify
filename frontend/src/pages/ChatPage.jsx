@@ -17,7 +17,10 @@ function ChatPage() {
     <div id="chat-page" className="relative w-full max-w-6xl h-200">
       <BorderAnimatedContainer>
         {/* LEFT SIDE */}
-        <div id="left-side" className="bg-slate-800/50 backdrop-blur-sm flex flex-col lg:w-1/3 ">
+        <div
+          id="left-side"
+          className="bg-slate-800/50 backdrop-blur-sm flex flex-col lg:w-1/3 h-2/5 lg:h-full"
+        >
           <ProfileHeader />
           <ActiveTabSwitch />
 
