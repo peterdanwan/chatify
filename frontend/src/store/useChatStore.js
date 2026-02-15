@@ -91,12 +91,11 @@ export const useChatStore = create((set, get) => ({
   },
 
   sendMessage: async ({ text, image }) => {
-    // There's a closure for messages
-    const { selectedUser, messages } = get();
+    const { selectedUser } = get();
     const { authUser } = useAuthStore.getState();
     const tempId = `temp-${Date.now()}`;
 
-    // As if we are creating a mock-up message for our database
+    // Create optimistic message for immediate UI update
     const optimisticMessage = {
       _id: tempId,
       senderId: authUser._id,
@@ -104,30 +103,31 @@ export const useChatStore = create((set, get) => ({
       text,
       image,
       createdAt: new Date().toISOString(),
-      isOptimistic: true, // flag to identify optimistic messages (optional)
+      isOptimistic: true,
     };
 
-    // Immediately updates the UI by adding this message
-    set({ messages: [...messages, optimisticMessage] });
+    // Immediately update UI with optimistic message
+    set({ messages: [...get().messages, optimisticMessage] });
 
     try {
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, { text, image });
 
-      // This code just appends the new message to the messages we see.
-      // set({messages: [...messages, ...res.data]}); <- create a new array made by spreading out the contents of messages and res.data
-      set({ messages: [...messages, res.data] }); // Use original messages + real message
+      // FIXED: Replace the optimistic message with the real one from the server
+      set({
+        messages: get().messages.map((msg) => (msg._id === tempId ? res.data : msg)),
+      });
     } catch (error) {
-      // Using the closure at the top of the file, we reset messages back to the original messages
-      set({ messages: messages });
+      // Remove the optimistic message on error
+      set({
+        messages: get().messages.filter((msg) => msg._id !== tempId),
+      });
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
-    } finally {
-      //
     }
   },
 
   subscribeToMessages: () => {
-    const { selectedUser, isSoundEnabled } = get();
+    const { selectedUser } = get();
 
     if (!selectedUser) {
       return;
@@ -139,21 +139,30 @@ export const useChatStore = create((set, get) => ({
       return;
     }
 
+    // FIXED: Use a function to get the latest state instead of closure
     socket.on('newMessage', (newMessage) => {
-      // !!
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+      const currentSelectedUser = get().selectedUser;
+
+      // Only add message if it's from the currently selected user
+      const isMessageSentFromSelectedUser = newMessage.senderId === currentSelectedUser?._id;
       if (!isMessageSentFromSelectedUser) {
         return;
       }
 
+      // Get fresh messages from state
       const currentMessages = get().messages;
-      set({ messages: [...currentMessages, newMessage] });
 
-      if (isSoundEnabled) {
-        const notificationSound = new Audio('/sounds/notification.mp3');
+      // Check if message already exists (prevent duplicates)
+      const messageExists = currentMessages.some((msg) => msg._id === newMessage._id);
+      if (!messageExists) {
+        set({ messages: [...currentMessages, newMessage] });
 
-        notificationSound.currentTime = 0; // Reset to start
-        notificationSound.play().catch((error) => console.log('Audio play failed:', error));
+        // Play notification sound
+        if (get().isSoundEnabled) {
+          const notificationSound = new Audio('/sounds/notification.mp3');
+          notificationSound.currentTime = 0;
+          notificationSound.play().catch((error) => console.log('Audio play failed:', error));
+        }
       }
     });
   },
