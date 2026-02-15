@@ -7,16 +7,31 @@ import NoChatHistoryPlaceholder from './NoChatHistoryPlaceholder';
 import ChatMessage from './ChatMessage';
 
 export default function ChatBody() {
-  const { selectedUser, getMessagesByUserId, messages, isMessagesLoading } = useChatStore();
-  const messageEndRef = useRef(null);
+  const {
+    selectedUser,
+    getMessagesByUserId,
+    subscribeToMessages,
+    unsubscribeFromMessages,
+    messages,
+    isMessagesLoading,
+  } = useChatStore();
 
+  // TODO: Review this part since ESLINT is giving an error
+  // FIXED: Only depend on selectedUser._id, not the Zustand functions
+  // Zustand functions are stable references, but ESLint doesn't know that
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
-  }, [selectedUser, getMessagesByUserId]);
+    subscribeToMessages();
 
+    return () => unsubscribeFromMessages();
+  }, [selectedUser._id]); // Only the ID changes when switching users
+
+  const messageEndRef = useRef(null);
+
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behaviour: 'smooth' });
+    if (messageEndRef.current && messages.length > 0) {
+      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
@@ -26,8 +41,6 @@ export default function ChatBody() {
         <div id="chat-messages" className="max-w-3xl mx-auto space-y-6">
           {[...messages]
             .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-            // OLD: MongoDB does sort by chronological order, but we will use the sort method to ensure this is the case.
-            // {messages.map((msg) => (
             .map((msg) => (
               <ChatMessage msg={msg} key={msg._id} />
             ))}
