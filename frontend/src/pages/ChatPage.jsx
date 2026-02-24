@@ -16,10 +16,12 @@ function ChatPage() {
   return (
     <div id="chat-page" className="relative w-full max-w-6xl h-dvh lg:h-200">
       <BorderAnimatedContainer>
-        {/* LEFT SIDE */}
+        {/* LEFT SIDE — hidden on mobile when a user is selected */}
         <div
           id="left-side"
-          className="bg-slate-800/50 backdrop-blur-sm flex flex-col lg:w-1/3 h-2/5 lg:h-full"
+          className={`bg-slate-800/50 h-full backdrop-blur-sm flex flex-col lg:w-1/3 lg:flex ${
+            selectedUser ? 'hidden' : 'flex'
+          }`}
         >
           <ProfileHeader />
           <ActiveTabSwitch />
@@ -30,10 +32,12 @@ function ChatPage() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT SIDE — shown on mobile when a user is selected, always shown on lg */}
         <div
           id="right-side"
-          className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm lg:w-2/3 overflow-y-auto justify-center"
+          className={`flex-1 flex-col bg-slate-900/50 backdrop-blur-sm lg:w-2/3 overflow-y-auto justify-center lg:flex ${
+            selectedUser ? 'flex' : 'hidden'
+          }`}
         >
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
