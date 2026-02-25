@@ -2,13 +2,12 @@
 
 import { useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
-import { useAuthStore } from '../store/useAuthStore';
 import UsersLoadingSkeleton from './UsersLoadingSkeleton';
 import NoChatsFound from './NoChatsFound';
+import UserButton from './UserButton';
 
 function ChatsList() {
-  const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } = useChatStore();
-  const { onlineUsers } = useAuthStore();
+  const { getMyChatPartners, chats, isUsersLoading } = useChatStore();
 
   useEffect(() => {
     getMyChatPartners();
@@ -25,26 +24,7 @@ function ChatsList() {
   return (
     <>
       {chats.map((chat) => (
-        <button
-          key={chat._id}
-          className="w-full bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors tooltip tooltip-info tooltip-bottom"
-          onClick={() => setSelectedUser(chat)}
-          data-tip={`${chat.firstName} ${chat.lastName}`}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={`avatar ${onlineUsers.includes(chat._id) ? 'avatar-online' : 'avatar-offline'}`}
-            >
-              <div className="size-12 rounded-full">
-                <img
-                  src={chat.profilePic || '/avatar.png'}
-                  alt={`${chat.firstName} ${chat.lastName}`}
-                />
-              </div>
-            </div>
-            <h4 className="text-slate-200 font-medium truncate">{`${chat.firstName} ${chat.lastName}`}</h4>
-          </div>
-        </button>
+        <UserButton key={chat._id} user={chat} />
       ))}
     </>
   );
