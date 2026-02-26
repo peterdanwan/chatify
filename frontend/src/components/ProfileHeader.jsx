@@ -309,14 +309,14 @@ function ProfileHeader() {
             <div className="flex justify-end gap-3 p-4">
               <button
                 onClick={handleCropCancel}
-                className="px-4 py-2 text-sm bg-indigo-100 rounded-lg hover:bg-white text-indigo-900 hover:text-indigo-600 transition-colors hover:cursor-pointer"
+                className="px-4 py-2 text-sm rounded-lg bg-indigo-100 hover:bg-white text-indigo-900 hover:text-indigo-600 transition-colors hover:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCropConfirm}
                 disabled={isUpdatingProfile}
-                className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2 hover:cursor-pointer"
+                className="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50 flex items-center gap-2 hover:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {isUpdatingProfile && <Loader2 className="size-4 animate-spin" />}
                 Apply
