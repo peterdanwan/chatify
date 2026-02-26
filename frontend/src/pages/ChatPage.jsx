@@ -9,6 +9,7 @@ import ContactsList from '../components/ContactsList';
 import NoConversationPlaceholder from '../components/NoConversationPlaceholder';
 import ProfileHeader from '../components/ProfileHeader';
 import { useChatStore } from '../store/useChatStore';
+import NameFilter from '../components/NameFilter';
 
 function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
@@ -25,11 +26,10 @@ function ChatPage() {
         >
           <ProfileHeader />
           <ActiveTabSwitch />
+          <NameFilter activeTab={activeTab} />
 
           {/* Container that shows Chats or Contacts  */}
-          <div id="chats-or-contacts-container" className="flex-1 overflow-y-auto p-4 space-y-2">
-            {activeTab === 'chats' ? <ChatsList /> : <ContactsList />}
-          </div>
+          {activeTab === 'chats' ? <ChatsList /> : <ContactsList />}
         </div>
 
         {/* RIGHT SIDE — shown on mobile when a user is selected, always shown on lg */}
