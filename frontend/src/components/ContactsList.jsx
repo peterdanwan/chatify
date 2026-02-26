@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
-import { useAuthStore } from '../store/useAuthStore';
 import UsersLoadingSkeleton from './UsersLoadingSkeleton';
 import NoChatsFound from './NoChatsFound';
+import UserButton from './UserButton';
+import { filterByName } from '../lib/utils';
 
 function ContactsList() {
-  const { getAllContacts, allContacts, isUsersLoading, setSelectedUser } = useChatStore();
-  const { onlineUsers } = useAuthStore();
+  const { getAllContacts, allContacts, isUsersLoading, nameFilter } = useChatStore();
+
+  const filteredContacts = filterByName(allContacts, nameFilter);
 
   useEffect(() => {
     getAllContacts();
@@ -18,35 +20,16 @@ function ContactsList() {
     return <UsersLoadingSkeleton />;
   }
 
-  if (allContacts.length === 0) {
+  if (filteredContacts.length === 0) {
     return <NoChatsFound />;
   }
 
   return (
-    <>
-      {allContacts.map((contact) => (
-        <button
-          key={contact._id}
-          className="w-full bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors tooltip tooltip-info tooltip-bottom"
-          onClick={() => setSelectedUser(contact)}
-          data-tip={`${contact.firstName} ${contact.lastName}`}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={`avatar ${onlineUsers.includes(contact._id) ? 'avatar-online' : 'avatar-offline'}`}
-            >
-              <div className="size-12 rounded-full">
-                <img
-                  src={contact.profilePic || '/avatar.png'}
-                  alt={`${contact.firstName} ${contact.lastName}`}
-                />
-              </div>
-            </div>
-            <h4 className="text-slate-200 font-medium truncate">{`${contact.firstName} ${contact.lastName}`}</h4>
-          </div>
-        </button>
+    <div id="contacts-list" className="flex-1 overflow-y-auto p-4 space-y-2">
+      {filteredContacts.map((contact) => (
+        <UserButton key={contact._id} user={contact} />
       ))}
-    </>
+    </div>
   );
 }
 export default ContactsList;

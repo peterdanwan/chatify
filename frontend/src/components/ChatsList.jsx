@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
-import { useAuthStore } from '../store/useAuthStore';
 import UsersLoadingSkeleton from './UsersLoadingSkeleton';
 import NoChatsFound from './NoChatsFound';
+import UserButton from './UserButton';
+import { filterByName } from '../lib/utils';
 
 function ChatsList() {
-  const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } = useChatStore();
-  const { onlineUsers } = useAuthStore();
+  const { getMyChatPartners, chats, isUsersLoading, nameFilter } = useChatStore();
+
+  const filteredChats = filterByName(chats, nameFilter);
 
   useEffect(() => {
     getMyChatPartners();
@@ -18,35 +20,16 @@ function ChatsList() {
     return <UsersLoadingSkeleton />;
   }
 
-  if (chats.length === 0) {
+  if (filteredChats.length === 0) {
     return <NoChatsFound />;
   }
 
   return (
-    <>
-      {chats.map((chat) => (
-        <button
-          key={chat._id}
-          className="w-full bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors tooltip tooltip-info tooltip-bottom"
-          onClick={() => setSelectedUser(chat)}
-          data-tip={`${chat.firstName} ${chat.lastName}`}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={`avatar ${onlineUsers.includes(chat._id) ? 'avatar-online' : 'avatar-offline'}`}
-            >
-              <div className="size-12 rounded-full">
-                <img
-                  src={chat.profilePic || '/avatar.png'}
-                  alt={`${chat.firstName} ${chat.lastName}`}
-                />
-              </div>
-            </div>
-            <h4 className="text-slate-200 font-medium truncate">{`${chat.firstName} ${chat.lastName}`}</h4>
-          </div>
-        </button>
+    <div id="chats-list" className="flex-1 overflow-y-auto p-4 space-y-2">
+      {filteredChats.map((chat) => (
+        <UserButton key={chat._id} user={chat} />
       ))}
-    </>
+    </div>
   );
 }
 export default ChatsList;
