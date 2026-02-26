@@ -14,6 +14,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUserLoading: false, // used in ChatsList.jsx & ContactsList.jsx
   isMessagesLoading: false, // used in ChatContainer.jsx
+  nameFilter: '',
 
   // Initialize from localStorage (cache), will be overwritten by DB value on load
   isSoundEnabled: JSON.parse(localStorage.getItem('isSoundEnabled')) === true,
@@ -173,4 +174,6 @@ export const useChatStore = create((set, get) => ({
       socket.off('newMessage');
     }
   },
+
+  setNameFilter: (nameFilter) => set({ nameFilter }),
 }));
