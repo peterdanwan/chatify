@@ -22,11 +22,11 @@ function ChatsList() {
   }
 
   return (
-    <>
+    <div id="chats-list" className="flex-1 overflow-y-auto p-4 space-y-2">
       {chats.map((chat) => (
         <UserButton key={chat._id} user={chat} />
       ))}
-    </>
+    </div>
   );
 }
 export default ChatsList;

@@ -22,11 +22,11 @@ function ContactsList() {
   }
 
   return (
-    <>
+    <div id="contacts-list" className="flex-1 overflow-y-auto p-4 space-y-2">
       {allContacts.map((contact) => (
         <UserButton key={contact._id} user={contact} />
       ))}
-    </>
+    </div>
   );
 }
 export default ContactsList;
