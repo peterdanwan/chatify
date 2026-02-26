@@ -12,3 +12,10 @@ export const safeErrorMessage = function (
   // Uses ?? (nullish coalescing) to provide fallbacks for null/undefined
   return error?.response?.data?.message ?? error?.message ?? fallbackText;
 };
+
+export function filterByName(users, nameFilter) {
+  return users.filter((user) => {
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    return fullName.includes(nameFilter.toLowerCase());
+  });
+}
