@@ -5,9 +5,12 @@ import { useChatStore } from '../store/useChatStore';
 import UsersLoadingSkeleton from './UsersLoadingSkeleton';
 import NoChatsFound from './NoChatsFound';
 import UserButton from './UserButton';
+import { filterByName } from '../lib/utils';
 
 function ChatsList() {
-  const { getMyChatPartners, chats, isUsersLoading } = useChatStore();
+  const { getMyChatPartners, chats, isUsersLoading, nameFilter } = useChatStore();
+
+  const filteredChats = filterByName(chats, nameFilter);
 
   useEffect(() => {
     getMyChatPartners();
@@ -17,13 +20,13 @@ function ChatsList() {
     return <UsersLoadingSkeleton />;
   }
 
-  if (chats.length === 0) {
+  if (filteredChats.length === 0) {
     return <NoChatsFound />;
   }
 
   return (
     <div id="chats-list" className="flex-1 overflow-y-auto p-4 space-y-2">
-      {chats.map((chat) => (
+      {filteredChats.map((chat) => (
         <UserButton key={chat._id} user={chat} />
       ))}
     </div>
