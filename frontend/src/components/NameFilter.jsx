@@ -20,17 +20,17 @@ function NameFilter({ activeTab }) {
           id="fullname"
           name="fullname"
           placeholder={text}
-          className="w-full bg-transparent outline-none px-4 py-2 text-white placeholder-white/50"
+          className="w-full bg-transparent outline-none ps-4 py-2 text-white placeholder-white/50"
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
         />
         {nameFilter ? (
-          <button onClick={() => setNameFilter('')} className="hover:cursor-pointer">
-            <XIcon className="shrink-0 mr-3 self-center text-white/70" />
+          <button onClick={() => setNameFilter('')} className="hover:cursor-pointer pe-3">
+            <XIcon className="self-center text-white/70" />
           </button>
         ) : (
-          <button onClick={() => inputRef.current.focus()} className="hover:cursor-text">
-            <SearchIcon className="shrink-0 mr-3 self-center text-white/70" />
+          <button onClick={() => inputRef.current.focus()} className="hover:cursor-text pe-3">
+            <SearchIcon className="self-center text-white/70" />
           </button>
         )}
       </div>
