@@ -2,21 +2,12 @@
 
 import { useRef, useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import {
-  CircleUserRound,
-  Loader2,
-  LogOutIcon,
-  SettingsIcon,
-  Volume2Icon,
-  VolumeOffIcon,
-} from 'lucide-react';
+import { CircleUserRound, Loader2, LogOutIcon, SettingsIcon } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
-import { useChatStore } from '../store/useChatStore';
 import ProfileHeaderButton from './ProfileHeaderButton';
 import SettingsModal from './SettingsModal';
-
-const mouseClickSound = new Audio('/sounds/mouse-click.mp3');
+import SoundToggleButton from './SoundToggleButton';
 
 // ---------------------------------------------------------------------------
 // Crop helper
@@ -93,7 +84,6 @@ async function getCroppedImg(imageSrc, pixelCrop) {
 // ---------------------------------------------------------------------------
 function ProfileHeader() {
   const { logout, authUser, updateProfile, isUpdatingProfile } = useAuthStore();
-  const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -153,18 +143,6 @@ function ProfileHeader() {
   const handleCropCancel = () => {
     setIsCropModalOpen(false);
     setRawImageSrc(null);
-  };
-
-  const handleToggleButtonClick = () => {
-    // Only play sound if we're turning sound on
-    if (!isSoundEnabled) {
-      mouseClickSound.currentTime = 0; // reset to start
-      mouseClickSound.play().catch((error) => {
-        console.log('Audio play failed:', error);
-      });
-    }
-
-    toggleSound();
   };
 
   const handleSettingsButtonClick = () => {
@@ -237,17 +215,7 @@ function ProfileHeader() {
             <LogOutIcon className="size-5" />
           </ProfileHeaderButton>
 
-          {/* SOUND TOGGLE BUTTON */}
-          <ProfileHeaderButton
-            onClick={handleToggleButtonClick}
-            dataTip={isSoundEnabled ? 'Toggle Sound Off' : 'Toggle Sound On'}
-          >
-            {isSoundEnabled ? (
-              <Volume2Icon className="size-5" />
-            ) : (
-              <VolumeOffIcon className="size-5" />
-            )}
-          </ProfileHeaderButton>
+          <SoundToggleButton />
 
           {/* SETTINGS BUTTON */}
           <ProfileHeaderButton onClick={handleSettingsButtonClick} dataTip="Settings">
