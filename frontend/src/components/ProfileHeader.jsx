@@ -1,114 +1,26 @@
 // frontend/src/components/ProfileHeader.jsx
 
-import { useRef, useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
-import { CircleUserRound, Loader2, SettingsIcon } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { CircleUserRound, Loader2 } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
+import CropModal from './CropModal';
 import SettingsModal from './SettingsModal';
 import SoundToggleButton from './SoundToggleButton';
 import LogoutButton from './LogoutButton';
 import SettingsButton from './SettingsButton';
 
-// ---------------------------------------------------------------------------
-// Crop helper
-// ---------------------------------------------------------------------------
-// OUTPUT_SIZE is the pixel dimensions of the final square image we send to the
-// server. 400px is a good balance — sharp on retina screens, not bloated.
-const OUTPUT_SIZE = 400;
-
-/**
- * Given a source image URL and the pixel-perfect crop region returned by
- * react-easy-crop, this draws the cropped area onto a canvas and returns a
- * base64 JPEG string that is exactly OUTPUT_SIZE × OUTPUT_SIZE pixels.
- *
- * We multiply by devicePixelRatio so that on retina (2×, 3×) displays the
- * canvas backing store has enough pixels to look sharp instead of blurry.
- */
-async function getCroppedImg(imageSrc, pixelCrop) {
-  // 1. Load the original image into memory so we can draw from it.
-  const image = new Image();
-  image.src = imageSrc;
-  await new Promise((resolve, reject) => {
-    image.onload = resolve;
-    image.onerror = reject;
-  });
-
-  // 2. Account for high-DPI / retina screens.
-  //    A 2× retina screen has devicePixelRatio = 2, meaning we need a canvas
-  //    that is 800×800 backing pixels to render a crisp 400×400 CSS pixel image.
-  const dpr = window.devicePixelRatio || 1;
-  const canvas = document.createElement('canvas');
-  canvas.width = OUTPUT_SIZE * dpr;
-  canvas.height = OUTPUT_SIZE * dpr;
-
-  const ctx = canvas.getContext('2d');
-
-  // Scale the context so our drawing commands use CSS pixels, but the canvas
-  // backing store is dpr× larger — this is what prevents graininess.
-  ctx.scale(dpr, dpr);
-
-  // 3. Draw only the cropped region of the source image, stretched to fill the
-  //    full OUTPUT_SIZE × OUTPUT_SIZE output square.
-  ctx.drawImage(
-    image,
-    pixelCrop.x, // source x
-    pixelCrop.y, // source y
-    pixelCrop.width, // source width  (the crop window on the original image)
-    pixelCrop.height, // source height
-    0, // destination x
-    0, // destination y
-    OUTPUT_SIZE, // destination width
-    OUTPUT_SIZE // destination height
-  );
-
-  // 4. Export as a high-quality JPEG base64 string.
-  //    0.92 quality is visually lossless for profile pictures and keeps file
-  //    size reasonable. Use 'image/webp' if you want even better compression.
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return reject(new Error('Canvas toBlob failed'));
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-      },
-      'image/jpeg',
-      0.92
-    );
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 function ProfileHeader() {
   const { authUser, updateProfile, isUpdatingProfile } = useAuthStore();
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // --- Crop state ---
-  // rawImageSrc holds the full-resolution data URL we hand to the Cropper.
+  // rawImageSrc holds the full-resolution data URL we hand to <CropModal>.
   // We keep it separate from selectedImage so the displayed avatar always
   // shows the final cropped result, not the raw upload.
   const [rawImageSrc, setRawImageSrc] = useState(null);
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-
-  // react-easy-crop needs these two pieces of state to track the pan/zoom.
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-
-  // onCropComplete gives us the *pixel* coordinates of the crop area on the
-  // original image — this is what we pass to getCroppedImg.
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
   const fileInputRef = useRef(null);
-
-  // Called by react-easy-crop every time the user moves/zooms the crop box.
-  const handleCropComplete = useCallback((_croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
 
   // Step 1: User picks a file → read it into memory and open the crop modal.
   const handleImageUpload = (event) => {
@@ -120,38 +32,24 @@ function ProfileHeader() {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
-      setRawImageSrc(reader.result); // full-res image for the cropper
-      setCrop({ x: 0, y: 0 }); // reset crop position
-      setZoom(1); // reset zoom
-      setIsCropModalOpen(true);
+      setRawImageSrc(reader.result);
     };
   };
 
-  // Step 2: User confirms the crop → extract pixels, upload, close modal.
-  const handleCropConfirm = async () => {
+  // Step 2: User confirms the crop → update avatar preview and upload.
+  const handleCropConfirm = async (croppedBase64) => {
     try {
-      const croppedBase64 = await getCroppedImg(rawImageSrc, croppedAreaPixels);
-      setSelectedImage(croppedBase64); // update avatar preview immediately
+      setSelectedImage(croppedBase64);
       await updateProfile({ profilePic: croppedBase64 });
     } catch (err) {
-      console.error('Crop failed:', err);
+      console.error('Upload failed:', err);
     } finally {
-      setIsCropModalOpen(false);
       setRawImageSrc(null);
     }
   };
 
   const handleCropCancel = () => {
-    setIsCropModalOpen(false);
     setRawImageSrc(null);
-  };
-
-  const handleSettingsButtonClick = () => {
-    setIsSettingsOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsSettingsOpen(false);
   };
 
   return (
@@ -213,81 +111,20 @@ function ProfileHeader() {
         <div id="settings-container" className="flex gap-4 items-center mb-3">
           <LogoutButton />
           <SoundToggleButton />
-          <SettingsButton onClick={handleSettingsButtonClick} />
+          <SettingsButton onClick={() => setIsSettingsOpen(true)} />
         </div>
       </div>
 
-      {/* ----------------------------------------------------------------- */}
-      {/* CROP MODAL                                                         */}
-      {/* ----------------------------------------------------------------- */}
-      {/* We render this inline rather than using your existing <Modal> so   */}
-      {/* we can give the Cropper a fixed-height container — react-easy-crop */}
-      {/* requires its parent to have a non-zero, explicit height.           */}
-      {isCropModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="bg-slate-800 rounded-xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
-            <div className="p-4 border-b border-slate-700">
-              <h2 className="text-slate-100 font-semibold">Crop Profile Picture</h2>
-              <p className="text-slate-400 text-xs mt-1">
-                Drag to reposition · Scroll or pinch to zoom
-              </p>
-            </div>
-
-            {/*
-              This div MUST have an explicit height. react-easy-crop positions
-              itself absolutely within this container, so if the container has
-              no height the cropper collapses to zero and is invisible.
-            */}
-            <div className="relative w-full aspect-square bg-slate-900">
-              <Cropper
-                image={rawImageSrc}
-                crop={crop}
-                zoom={zoom}
-                aspect={1} // 1:1 = square avatar (match your <img> shape)
-                cropShape="round" // shows a circular guide; remove for square
-                showGrid={false}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={handleCropComplete}
-              />
-            </div>
-
-            {/* Zoom slider — gives users without a scroll wheel a way to zoom */}
-            <div className="px-4 pt-4 pb-2">
-              <label className="text-slate-400 text-xs mb-1 block">Zoom</label>
-              <input
-                type="range"
-                min={1}
-                max={3}
-                step={0.01}
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full accent-indigo-500 cursor-grab active:cursor-grabbing"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3 p-4">
-              <button
-                onClick={handleCropCancel}
-                className="px-4 py-2 text-sm rounded-lg bg-indigo-100 hover:bg-white text-indigo-900 hover:text-indigo-600 transition-colors hover:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCropConfirm}
-                disabled={isUpdatingProfile}
-                className="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50 flex items-center gap-2 hover:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                {isUpdatingProfile && <Loader2 className="size-4 animate-spin" />}
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
+      {rawImageSrc && (
+        <CropModal
+          imageSrc={rawImageSrc}
+          isUpdating={isUpdatingProfile}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
       )}
 
-      <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseModal} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 }
