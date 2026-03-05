@@ -2,12 +2,13 @@
 
 import { useRef, useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import { CircleUserRound, Loader2, LogOutIcon, SettingsIcon } from 'lucide-react';
+import { CircleUserRound, Loader2, SettingsIcon } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import ProfileHeaderButton from './ProfileHeaderButton';
 import SettingsModal from './SettingsModal';
 import SoundToggleButton from './SoundToggleButton';
+import LogoutButton from './LogoutButton';
 
 // ---------------------------------------------------------------------------
 // Crop helper
@@ -83,7 +84,7 @@ async function getCroppedImg(imageSrc, pixelCrop) {
 // Component
 // ---------------------------------------------------------------------------
 function ProfileHeader() {
-  const { logout, authUser, updateProfile, isUpdatingProfile } = useAuthStore();
+  const { authUser, updateProfile, isUpdatingProfile } = useAuthStore();
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -210,11 +211,7 @@ function ProfileHeader() {
 
         {/* BUTTONS */}
         <div id="settings-container" className="flex gap-4 items-center mb-3">
-          {/* LOGOUT BUTTON */}
-          <ProfileHeaderButton onClick={logout} dataTip="Logout">
-            <LogOutIcon className="size-5" />
-          </ProfileHeaderButton>
-
+          <LogoutButton />
           <SoundToggleButton />
 
           {/* SETTINGS BUTTON */}
