@@ -14,7 +14,7 @@ import {
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import ProfileHeaderButton from './ProfileHeaderButton';
-import Modal from './Modal';
+import SettingsModal from './SettingsModal';
 
 const mouseClickSound = new Audio('/sounds/mouse-click.mp3');
 
@@ -326,14 +326,7 @@ function ProfileHeader() {
         </div>
       )}
 
-      {/* SETTINGS MODAL */}
-      <Modal isOpen={isSettingsOpen} onClose={handleCloseModal} title="Settings">
-        <p className="text-slate-400">Configure your preferences below</p>
-        {/* TODO: Add settings content here */}
-        <div className="space-y-4 mt-6">
-          {/* e.g., Option to delete user. Change status. etc. */}
-        </div>
-      </Modal>
+      <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseModal} />
     </div>
   );
 }
