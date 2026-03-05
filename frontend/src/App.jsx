@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import { useAuthStore } from './store/useAuthStore';
 import GlowBlob from './components/GlowBlob';
+import DeleteUserPage from './pages/DeleteUserPage';
 
 function App() {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -49,11 +50,12 @@ function App() {
       <GlowBlob position="bottom-right" backgroundColour="bg-cyan-500" />
       <Routes>
         {/* Redirect users to the login page when not authenticated */}
-        <Route path="/" element={authUser ? <ChatPage /> : <Navigate to={'/login'} />} />
+        <Route path="/" element={authUser ? <ChatPage /> : <Navigate to="/login" />} />
         {/* Redirect users to the home page when authenticated */}
-        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={'/'} />} />
+        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
         {/* Redirect users to the home page when authenticated */}
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />} />
+        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+        <Route path="/delete-user" element={authUser ? <DeleteUserPage /> : <Navigate to="/" />} />
       </Routes>
       <Toaster />
     </div>
