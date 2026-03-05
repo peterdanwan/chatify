@@ -5,10 +5,10 @@ import Cropper from 'react-easy-crop';
 import { CircleUserRound, Loader2, SettingsIcon } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
-import ProfileHeaderButton from './ProfileHeaderButton';
 import SettingsModal from './SettingsModal';
 import SoundToggleButton from './SoundToggleButton';
 import LogoutButton from './LogoutButton';
+import SettingsButton from './SettingsButton';
 
 // ---------------------------------------------------------------------------
 // Crop helper
@@ -213,11 +213,7 @@ function ProfileHeader() {
         <div id="settings-container" className="flex gap-4 items-center mb-3">
           <LogoutButton />
           <SoundToggleButton />
-
-          {/* SETTINGS BUTTON */}
-          <ProfileHeaderButton onClick={handleSettingsButtonClick} dataTip="Settings">
-            <SettingsIcon className="size-5" />
-          </ProfileHeaderButton>
+          <SettingsButton onClick={handleSettingsButtonClick} />
         </div>
       </div>
 
