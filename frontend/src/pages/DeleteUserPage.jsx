@@ -81,13 +81,8 @@ function DeleteUserPage() {
                 </div>
               </div>
 
-              {/* Submit — uses a red variant to signal the destructive nature of the action */}
-              <SubmitButton
-                loadingState={isDeletingUser}
-                className="w-full py-2.5 px-4 rounded-lg font-medium text-white
-                  bg-red-600 hover:bg-red-700 transition-colors duration-200
-                  disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              {/* Submit — error variant signals the destructive nature of the action */}
+              <SubmitButton isLoading={isDeletingUser} variant="error">
                 Yes, permanently delete my account
               </SubmitButton>
             </form>
