@@ -1,6 +1,5 @@
 // frontend/src/components/GlowBlob.jsx
 
-// GlowBlob.jsx
 const positionClasses = {
   'top-left': 'top-0 left-0',
   'top-right': 'top-0 right-0',
