@@ -49,6 +49,9 @@ export const useAuthStore = create((set, get) => ({
   // A loading state for when the user is updating their profile picture
   isUpdatingProfile: false,
 
+  // A loading state for account deletion
+  isDeletingUser: false,
+
   socket: null,
 
   onlineUsers: [],
@@ -147,6 +150,31 @@ export const useAuthStore = create((set, get) => ({
       console.error('Error with logout', error);
     } finally {
       set({ isUpdatingProfile: false });
+    }
+  },
+
+  // Sends a DELETE request after re-verifying the user's email + password before deletion
+  // On success:
+  // 1. clears the auth cookie (server-side)
+  // 2. wipes local auth state
+  // 3. disconnects the socket, mirroring the logout flow
+  //
+  // App.jsx's route guard on /delete-user then automatically
+  // redirects to: /login once authUser becomes null.
+  deleteUser: async (credentials) => {
+    set({ isDeletingUser: true });
+
+    try {
+      await axiosInstance.delete('/auth/delete-user', { data: credentials });
+      get().disconnectSocket();
+      set({ authUser: null });
+      toast.success('Your account has successfully been deleted.');
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with deleteUser', error);
+    } finally {
+      set({ isDeletingUser: false });
     }
   },
 

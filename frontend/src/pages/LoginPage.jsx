@@ -71,12 +71,12 @@ function LoginPage() {
                     </div>
                   </div>
 
-                  {/* Submit Button */}
-                  <SubmitButton loadingState={isLoggingIn}>Login</SubmitButton>
+                  {/* Submit Button — variant defaults to "default" (cyan) */}
+                  <SubmitButton isLoading={isLoggingIn}>Login</SubmitButton>
                 </form>
 
                 <div className="text-center mt-4">
-                  {/* Login Link */}
+                  {/* Signup Link */}
                   <Link to="/signup" className="auth-link">
                     Don't have an account? Sign up here.
                   </Link>

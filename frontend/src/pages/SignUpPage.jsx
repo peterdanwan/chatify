@@ -1,7 +1,7 @@
 // frontend/src/pages/SignUpPage.jsx
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { MessageCircleIcon, LockIcon, MailIcon, UserIcon, LoaderIcon } from 'lucide-react';
+import { MessageCircleIcon, LockIcon, MailIcon, UserIcon } from 'lucide-react';
 
 import FormInput from '../components/FormInput';
 import { useAuthStore } from '../store/useAuthStore';
@@ -97,8 +97,8 @@ function SignUpPage() {
                     </div>
                   </div>
 
-                  {/* Submit Button */}
-                  <SubmitButton loadingState={isSigningUp}>Create Account</SubmitButton>
+                  {/* Submit Button — variant defaults to "default" (cyan) */}
+                  <SubmitButton isLoading={isSigningUp}>Create Account</SubmitButton>
                 </form>
 
                 <div className="text-center mt-4">

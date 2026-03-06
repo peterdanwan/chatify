@@ -29,8 +29,20 @@
   @apply inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-cyan-500/20 text-cyan-300;
 }
 
+/* Base structural styles shared across all button variants.
+   Colour transitions live here so they apply regardless of which variant is used. */
 .auth-btn {
-  @apply w-full bg-cyan-500 text-white rounded-lg py-2.5 font-medium cursor-pointer hover:bg-cyan-600 focus:ring-2 focus:ring-cyan-500;
+  @apply w-full text-white rounded-lg py-2.5 font-medium cursor-pointer focus:ring-2 focus:outline-none transition-colors duration-200;
+}
+
+/* Variant: default — used on LoginPage and SignUpPage */
+.auth-btn--default {
+  @apply bg-cyan-500 hover:bg-cyan-600 focus-visible:ring-white;
+}
+
+/* Variant: error — used on DeleteUserPage for destructive actions */
+.auth-btn--error {
+  @apply bg-red-500/45 hover:bg-red-500/70 focus-visible:ring-white;
 }
 
 .auth-link {
