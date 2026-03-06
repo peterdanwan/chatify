@@ -6,6 +6,7 @@ import ProviderButtons from '../components/ProviderButtons';
 import LoginForm from '../components/LoginForm';
 import LoginHeader from '../components/LoginHeader';
 import LoginGraphic from '../components/LoginGraphic';
+import Divider from '../components/Divider';
 
 function LoginPage() {
   return (
@@ -23,8 +24,10 @@ function LoginPage() {
               <div className="w-full max-w-md">
                 <LoginHeader />
                 <LoginForm />
+                <Divider className="py-6">OR</Divider>
                 <ProviderButtons />
-                <div className="text-center mt-4">
+                <Divider className="py-6">OR</Divider>
+                <div className="text-center">
                   <Link to="/signup" className="auth-link">
                     Don't have an account? Sign up here.
                   </Link>
