@@ -24,10 +24,9 @@ function LoginPage() {
               <div className="w-full max-w-md">
                 <LoginHeader />
                 <LoginForm />
-                <Divider className="py-6">OR</Divider>
+                <Divider className="py-6">Or continue with</Divider>
                 <ProviderButtons />
-                <Divider className="py-6">OR</Divider>
-                <div className="text-center">
+                <div className="text-center pbs-7">
                   <Link to="/signup" className="auth-link">
                     Don't have an account? Sign up here.
                   </Link>
