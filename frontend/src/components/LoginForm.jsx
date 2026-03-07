@@ -21,7 +21,7 @@ function LoginForm() {
   };
 
   return (
-    <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
       {/* Email */}
       <FormInput
         label="Email"
@@ -52,7 +52,9 @@ function LoginForm() {
       </div>
 
       {/* Submit Button — variant defaults to "default" (cyan) */}
-      <SubmitButton isLoading={isLoggingIn}>Login</SubmitButton>
+      <SubmitButton className="mbs-6" isLoading={isLoggingIn}>
+        Login
+      </SubmitButton>
     </form>
   );
 }
