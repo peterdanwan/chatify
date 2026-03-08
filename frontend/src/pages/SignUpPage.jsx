@@ -2,11 +2,13 @@
 import { Link } from 'react-router';
 
 import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
+import LeftSide from '../components/LeftSide';
+import RightSide from '../components/RightSide';
+import Header from '../components/Header';
 import SignUpForm from '../components/SignUpForm';
-import SignUpHeader from '../components/SignUpHeader';
-import SignUpGraphic from '../components/SignUpGraphic';
-import ProviderButtons from '../components/ProviderButtons';
 import Divider from '../components/Divider';
+import ProviderButtons from '../components/ProviderButtons';
+import SignUpGraphic from '../components/SignUpGraphic';
 
 function SignUpPage() {
   return (
@@ -16,32 +18,21 @@ function SignUpPage() {
       <div className="w-full relative max-w-6xl">
         <BorderAnimatedContainer>
           <div className="w-full flex flex-col md:flex-row">
-            {/* FORM + INPUT FIELDS - LEFT SIDE */}
-            <div
-              id="left-side"
-              className="md:w-1/2 p-8 flex items-center justify-center md:border-r border-slate-600/30"
-            >
-              <div className="w-full max-w-md">
-                <SignUpHeader />
-                <SignUpForm />
-                <Divider className="py-6">Or continue with</Divider>
-                <ProviderButtons />
-                <Divider className="py-6" />
-                <div className="text-center">
-                  <Link to="/login" className="auth-link">
-                    Already have an account? Login
-                  </Link>
-                </div>
+            <LeftSide>
+              <Header title="Create Account" subtitle="Sign up for a new account" />
+              <SignUpForm />
+              <Divider className="py-6">Or continue with</Divider>
+              <ProviderButtons />
+              <div className="text-center pbs-7">
+                <Link to="/login" className="auth-link">
+                  Already have an account? Login
+                </Link>
               </div>
-            </div>
+            </LeftSide>
 
-            {/* SIGNUP IMAGE - RIGHT SIDE*/}
-            <div
-              id="right-side"
-              className="hidden md:w-1/2 md:flex items-center justify-center p-8 bg-linear-to-bl from-slate-800/20 to-transparent"
-            >
+            <RightSide>
               <SignUpGraphic />
-            </div>
+            </RightSide>
           </div>
         </BorderAnimatedContainer>
       </div>
