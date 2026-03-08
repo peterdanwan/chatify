@@ -4,9 +4,11 @@ import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
 import { Link } from 'react-router';
 import ProviderButtons from '../components/ProviderButtons';
 import LoginForm from '../components/LoginForm';
-import LoginHeader from '../components/LoginHeader';
+import Header from '../components/Header';
 import LoginGraphic from '../components/LoginGraphic';
 import Divider from '../components/Divider';
+import LeftSide from '../components/LeftSide';
+import RightSideContainer from '../components/RightSide';
 
 function LoginPage() {
   return (
@@ -16,32 +18,21 @@ function LoginPage() {
       <div className="w-full relative max-w-6xl">
         <BorderAnimatedContainer>
           <div className="w-full flex flex-col md:flex-row">
-            {/* FORM + INPUT FIELDS - LEFT SIDE */}
-            <div
-              id="left-side"
-              className="md:w-1/2 p-8 flex items-center justify-center md:border-r border-slate-600/30"
-            >
-              <div className="w-full max-w-md">
-                <LoginHeader />
-                <LoginForm />
-                <Divider className="py-6">OR</Divider>
-                <ProviderButtons />
-                <Divider className="py-6">OR</Divider>
-                <div className="text-center">
-                  <Link to="/signup" className="auth-link">
-                    Don't have an account? Sign up here.
-                  </Link>
-                </div>
+            <LeftSide>
+              <Header title="Welcome Back" subtitle="Login to access your chats" />
+              <LoginForm />
+              <Divider className="py-6">Or continue with</Divider>
+              <ProviderButtons />
+              <div className="text-center pbs-7">
+                <Link to="/signup" className="auth-link">
+                  Don't have an account? Sign up here.
+                </Link>
               </div>
-            </div>
+            </LeftSide>
 
-            {/* LOGIN IMAGE - RIGHT SIDE*/}
-            <div
-              id="right-side"
-              className="hidden md:w-1/2 md:flex items-center justify-center p-8 bg-linear-to-bl from-slate-800/20 to-transparent"
-            >
+            <RightSideContainer>
               <LoginGraphic />
-            </div>
+            </RightSideContainer>
           </div>
         </BorderAnimatedContainer>
       </div>
