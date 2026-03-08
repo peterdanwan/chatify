@@ -78,7 +78,9 @@ function SignUpForm() {
       </div>
 
       {/* Submit Button — variant defaults to "default" (cyan) */}
-      <SubmitButton isLoading={isSigningUp}>Create Account</SubmitButton>
+      <SubmitButton className="mbs-4" isLoading={isSigningUp}>
+        Create Account
+      </SubmitButton>
     </form>
   );
 }
