@@ -1,6 +1,6 @@
 // frontend/src/components/ProviderButton.jsx
 
-function ProviderButton({ icon, children, className }) {
+function ProviderButton({ icon, children, className, onClick }) {
   const Icon = icon;
 
   return (
@@ -12,6 +12,7 @@ function ProviderButton({ icon, children, className }) {
         focus-visible:outline-none focus-visible:bg-gray-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cyan-500
         min-inline-fit ${className}
       `}
+      onClick={onClick}
     >
       <Icon className="w-5 h-5" />
       <span className="text-sm font-medium text-gray-700">{children}</span>
