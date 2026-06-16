@@ -19,6 +19,15 @@ import dotenv from 'dotenv';
 
 dotenv.config({ quiet: true });
 
+interface EnvVarConfig {
+  required: boolean | ((env: NodeJS.ProcessEnv) => boolean);
+  description: string;
+  values?: string[];
+  default?: string | number;
+  example?: string;
+  validate?: (value: string) => true | string;
+}
+
 // Define your environment variables with descriptions
 const ENV_VARS = {
   // ============================================
@@ -202,20 +211,20 @@ const ENV_VARS = {
       }
     },
   },
-};
+} satisfies Record<string, EnvVarConfig>;
 
 function validateEnv() {
   const errors = [];
   const warnings = [];
   const env = process.env;
 
-  for (const [key, config] of Object.entries(ENV_VARS)) {
-    const value = env[key];
+  for (const [key, config] of Object.entries(ENV_VARS) as [string, EnvVarConfig][]) {
+    const envValue = env[key];
     const isRequired =
       typeof config.required === 'function' ? config.required(env) : config.required;
 
     // Check if required variable is missing
-    if (isRequired && !value) {
+    if (isRequired && !envValue) {
       errors.push({
         variable: key,
         issue: 'Missing required environment variable',
@@ -226,22 +235,22 @@ function validateEnv() {
     }
 
     // Apply default if missing and not required
-    if (!value && config.default !== undefined) {
+    if (!envValue && config.default !== undefined) {
       process.env[key] = String(config.default);
       warnings.push(`${key}: Using default value "${config.default}"`);
       continue;
     }
 
     // Skip further validation if value is empty and not required
-    if (!value) {
+    if (!envValue) {
       continue;
     }
 
     // Validate allowed values
-    if (config.values && !config.values.includes(value)) {
+    if (config.values && !config.values.includes(envValue)) {
       errors.push({
         variable: key,
-        issue: `Invalid value "${value}"`,
+        issue: `Invalid value "${envValue}"`,
         description: config.description,
         allowedValues: config.values,
       });
@@ -249,7 +258,7 @@ function validateEnv() {
 
     // Custom validation
     if (config.validate) {
-      const validationResult = config.validate(value);
+      const validationResult = config.validate(envValue);
       if (validationResult !== true) {
         errors.push({
           variable: key,
