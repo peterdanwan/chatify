@@ -1,4 +1,4 @@
-// backend/src/config/endpoints.js
+// backend/src/config/endpoints.ts
 
 export const ENDPOINTS = {
   // Health check
