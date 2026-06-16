@@ -1,6 +1,6 @@
-// backend/src/lib/socket.js
+// backend/src/lib/socket.ts
 
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import http from 'http';
 import express from 'express';
 import { createLogger } from '#config/logger.js';
@@ -23,22 +23,22 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // Use this function to check if the user is online or not
-export function getReceiverSocketId(userId) {
+export function getReceiverSocketId(userId: string) {
   return userSocketMap.get(userId);
 }
 
 // This is for storing online users:
 // In-memory presence: Map<userId, Set<socketId>>
-const userSocketMap = new Map();
+const userSocketMap = new Map<string, Set<string>>();
 
 // 1. Detect when someone goes online
-io.on('connection', (socket) => {
-  const firstName = socket.user.firstName;
-  const lastName = socket.user.lastName;
+io.on('connection', (socket: Socket) => {
+  const firstName: string = socket.user.firstName;
+  const lastName: string = socket.user.lastName;
   log.info(`${firstName} ${lastName} connected`);
 
-  const userId = socket.userId;
-  const sockets = userSocketMap.get(userId) ?? new Set();
+  const userId: string = socket.userId;
+  const sockets = userSocketMap.get(userId) ?? new Set<string>();
   sockets.add(socket.id);
   userSocketMap.set(userId, sockets);
 
