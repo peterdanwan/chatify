@@ -17,7 +17,7 @@ import path from 'path';
 const { LOG_LEVEL, USE_PRETTY } = process.env;
 const baseOptions = { level: LOG_LEVEL };
 
-function createPinoLogger() {
+function createPinoLogger(): pino.Logger<never, boolean> {
   if (USE_PRETTY === 'true') {
     try {
       return pino({
@@ -52,10 +52,10 @@ function createPinoLogger() {
 // Export our configured pino logger
 // Note: if pino-pretty isn't installed (e.g., in Production and the env file is not set up correctly) it can throw an error.
 //       This issue is caught by "createPinoLogger()".
-export const parentLogger = createPinoLogger();
+export const parentLogger: pino.Logger<never, boolean> = createPinoLogger();
 
 // Create a synchronous logger specifically for shutdown scenarios
-export const shutDownLogger = pino(baseOptions, process.stdout);
+export const shutDownLogger: pino.Logger<never, boolean> = pino(baseOptions, process.stdout);
 
 /**
  * Creates a child logger with the module name automatically derived from import.meta.url
@@ -63,15 +63,23 @@ export const shutDownLogger = pino(baseOptions, process.stdout);
  * @param {boolean} [showFullPath=true] - If true, shows relative path from project root; if false, shows only filename
  * @returns {pino.Logger} A child logger with the module attribute set
  */
-export function createLogger(importMetaUrl, showFullPath = true) {
-  const filepath = fileURLToPath(importMetaUrl);
+export function createLogger(
+  importMetaUrl: string,
+  showFullPath: boolean = true
+): pino.Logger<never, boolean> {
+  const filepath: string = fileURLToPath(importMetaUrl);
 
-  const moduleName = showFullPath
+  const moduleName: string = showFullPath
     ? path.relative(process.cwd(), filepath)
     : path.basename(filepath);
 
   // Normalize path separators to forward slashes ('/') for consistency across platforms
-  const normalizedModuleName = moduleName.split(path.sep).join('/');
+  const normalizedModuleName: string = moduleName.split(path.sep).join('/');
 
-  return parentLogger.child({ module: normalizedModuleName });
+  const childLogger: pino.Logger<never, boolean> = parentLogger.child({
+    module: normalizedModuleName,
+  });
+  return childLogger;
 }
+
+// backend/src/config/logger.j
