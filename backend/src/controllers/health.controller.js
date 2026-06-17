@@ -1,10 +1,10 @@
 // backend/src/controllers/health.controller.js
 
 import { createLogger } from '#config/logger.js';
-import { ENDPOINT_PREFIXES } from '#config/endpoints.js';
+import { ENDPOINTS } from '#config/endpoints.js';
 
 const log = createLogger(import.meta.url);
-const { HEALTH } = ENDPOINT_PREFIXES;
+const HEALTH = ENDPOINTS.HEALTH.BASE;
 
 export const healthCheck = (req, res) => {
   log.info(`'${HEALTH}' (GET) endpoint reached.`);

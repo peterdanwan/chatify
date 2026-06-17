@@ -1,7 +1,7 @@
 // backend/src/controllers/message.controller.js
 
 import { createLogger } from '#config/logger.js';
-import { ENDPOINTS, ENDPOINT_PREFIXES } from '#config/endpoints.js';
+import { ENDPOINTS } from '#config/endpoints.js';
 import cloudinary from '#lib/cloudinary.js';
 import { Message } from '#models/Message.js';
 import { User } from '#models/User.js';
@@ -9,11 +9,10 @@ import { validateBase64Image } from '#lib/utils.js';
 import { getReceiverSocketId, io } from '#lib/socket.js';
 
 const log = createLogger(import.meta.url);
-const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.MESSAGES;
-const { CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
+const { BASE, CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
 
 export const getAllContacts = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}${CONTACTS}' (GET) endpoint reached`);
+  log.info(`'${BASE}${CONTACTS}' (GET) endpoint reached`);
   try {
     // .id return a string representation of _id (i.e., _id.toString())
     //   e.g.: '507f1f77bcf86cd799439011'
@@ -34,7 +33,7 @@ export const getAllContacts = async (req, res) => {
 };
 
 export const getChatPartners = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}${CHATS}' (GET) endpoint reached`);
+  log.info(`'${BASE}${CHATS}' (GET) endpoint reached`);
 
   try {
     const loggedInUserId = req.user._id;
@@ -76,7 +75,7 @@ export const getChatPartners = async (req, res) => {
 };
 
 export const getMessagesByUserId = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}${BY_USER_ID}' (GET) endpoint reached`);
+  log.info(`'${BASE}${BY_USER_ID}' (GET) endpoint reached`);
 
   // Obtain req.user from our "protectRoute" middleware
   const myId = req.user._id;
@@ -106,7 +105,7 @@ export const getMessagesByUserId = async (req, res) => {
 };
 
 export const sendMessage = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}${SEND_TO_ID}' (POST) endpoint reached`);
+  log.info(`'${BASE}${SEND_TO_ID}' (POST) endpoint reached`);
 
   try {
     const { text, image } = req.body;

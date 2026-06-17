@@ -12,7 +12,7 @@ import '#config/dotEnv.js';
 
 /* Import our custom modules */
 import { createLogger, shutDownLogger } from '#config/logger.js';
-import { ENDPOINT_PREFIXES } from '#config/endpoints.js';
+import { ENDPOINTS } from '#config/endpoints.js';
 import { connectDB } from '#lib/db.js';
 
 import { app, server } from '#lib/socket.js';
@@ -48,11 +48,11 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 
 /* Health check endpoint - BEFORE other routes so it's always accessible */
-app.use(ENDPOINT_PREFIXES.HEALTH, healthCheckRoute);
+app.use(ENDPOINTS.HEALTH.BASE, healthCheckRoute);
 
 /* API Routes */
-app.use(ENDPOINT_PREFIXES.AUTH, authRoutes);
-app.use(ENDPOINT_PREFIXES.MESSAGES, messageRoutes);
+app.use(ENDPOINTS.AUTH.BASE, authRoutes);
+app.use(ENDPOINTS.MESSAGES.BASE, messageRoutes);
 
 /* In production, serve frontend from within our backend server */
 if (process.env.NODE_ENV === 'production') {

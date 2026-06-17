@@ -27,12 +27,3 @@ export const ENDPOINTS = {
     SEND_TO_ID: '/send/:id',
   },
 };
-
-/**
- * Route prefixes for use in route registration
- */
-export const ENDPOINT_PREFIXES = {
-  HEALTH: ENDPOINTS.HEALTH.BASE,
-  AUTH: ENDPOINTS.AUTH.BASE,
-  MESSAGES: ENDPOINTS.MESSAGES.BASE,
-};
