@@ -2,7 +2,6 @@
 
 /* Import External Libraries */
 import express from 'express';
-import stoppable from 'stoppable';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
@@ -78,11 +77,9 @@ if (process.env.NODE_ENV === 'production') {
 
 connectDB()
   .then(() => {
-    stoppable(
-      server.listen(PORT, () => {
-        log.info(`Server listening on port: ${PORT}`);
-      })
-    );
+    server.listen(PORT, () => {
+      log.info(`Server listening on port: ${PORT}`);
+    });
   })
   // Better to "catch" the error at the top-most level where we call connectDB(), rather than within connectDB() itself.
   .catch((error) => {
@@ -91,20 +88,21 @@ connectDB()
   });
 
 /* Graceful shutdown handlers */
-const gracefulShutdown = (signal) => {
-  console.error(`${signal} received. Starting graceful shutdown...`);
+const gracefulShutdown = (signal: string) => {
   shutDownLogger.info(`${signal} received. Starting graceful shutdown...`);
 
   if (server) {
+    shutDownLogger.info('Server exists, stopping...');
     server.stop((err) => {
       if (err) {
-        shutDownLogger.error('Error during shutdown:', err);
+        shutDownLogger.error(err, 'Error during shutdown:');
         process.exit(1);
       }
       shutDownLogger.info('Server stopped gracefully');
       process.exit(0);
     });
   } else {
+    shutDownLogger.warn('No server to stop');
     process.exit(0);
   }
 };

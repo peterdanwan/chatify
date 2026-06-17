@@ -3,13 +3,14 @@
 import { Server, Socket } from 'socket.io';
 import http from 'http';
 import express from 'express';
+import stoppable from 'stoppable';
 import { createLogger } from '#config/logger.js';
 import { socketAuthMiddleware } from '#middleware/socket.auth.middleware.js';
 
 const log = createLogger(import.meta.url);
 const app = express();
 
-const server = http.createServer(app);
+const server = stoppable(http.createServer(app));
 
 // io = socket server
 const io = new Server(server, {
@@ -23,7 +24,7 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // Use this function to check if the user is online or not
-export function getReceiverSocketId(userId: string) {
+export function getReceiverSocketId(userId: string): Set<string> {
   return userSocketMap.get(userId);
 }
 
@@ -38,7 +39,7 @@ io.on('connection', (socket: Socket) => {
   log.info(`${firstName} ${lastName} connected`);
 
   const userId: string = socket.userId;
-  const sockets = userSocketMap.get(userId) ?? new Set<string>();
+  const sockets: Set<string> = userSocketMap.get(userId) ?? new Set<string>();
   sockets.add(socket.id);
   userSocketMap.set(userId, sockets);
 
@@ -49,7 +50,7 @@ io.on('connection', (socket: Socket) => {
   // - With socket.ion, we listen for events from clients
   socket.on('disconnect', () => {
     log.info(`${firstName} ${lastName} disconnected`);
-    const sockets = userSocketMap.get(userId);
+    const sockets: Set<string> = userSocketMap.get(userId);
 
     if (sockets) {
       sockets.delete(socket.id);
