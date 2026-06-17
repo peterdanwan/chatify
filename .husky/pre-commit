@@ -1,1 +1,2 @@
+npm run typecheck -C backend
 npx lint-staged
