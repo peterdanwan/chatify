@@ -52,4 +52,3 @@ const userSchema = new mongoose.Schema<IUser>(
 );
 
 export const User = mongoose.model<IUser>('User', userSchema);
-
