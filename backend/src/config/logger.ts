@@ -1,4 +1,4 @@
-// backend/src/config/logger.js
+// backend/src/config/logger.ts
 
 // Refs:
 // 0a. https://betterstack.com/community/guides/logging/logging-framework/
@@ -81,5 +81,3 @@ export function createLogger(
   });
   return childLogger;
 }
-
-// backend/src/config/logger.j
