@@ -1,5 +1,12 @@
 // backend/src/config/endpoints.ts
 
+type EndpointValue = string | ((...args: unknown[]) => string);
+
+type EndpointGroup = {
+  BASE: string;
+  [key: string]: EndpointValue;
+};
+
 export const ENDPOINTS = {
   // Health check
   HEALTH: {
@@ -26,4 +33,4 @@ export const ENDPOINTS = {
     BY_USER_ID: '/:id',
     SEND_TO_ID: '/send/:id',
   },
-};
+} satisfies Record<string, EndpointGroup>;
