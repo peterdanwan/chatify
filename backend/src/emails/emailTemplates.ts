@@ -4,7 +4,7 @@ import { createLogger } from '#config/logger.js';
 
 const log = createLogger(import.meta.url);
 
-export function createWelcomeEmailTemplate(name, clientURL) {
+export function createWelcomeEmailTemplate(name: string, clientURL: string): string {
   // PW: As an FYI, this is an example of a "Transactional Stream" email.
   // Transactional Stream: For "triggered" emails to one recipient at a time
   //  - Great for:
@@ -36,7 +36,7 @@ export function createWelcomeEmailTemplate(name, clientURL) {
 
   // HTML escape function to prevent XSS (i.e., Cross-Site Scripting)
   // Ref: https://portswigger.net/web-security/cross-site-scripting
-  const escapeHtml = (unsafe) => {
+  const escapeHtml = (unsafe: string): string => {
     return unsafe
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

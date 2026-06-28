@@ -1,4 +1,4 @@
-// backend/src/lib/arcjet.js
+// backend/src/lib/arcjet.ts
 
 import arcjet, { shield, detectBot, slidingWindow } from '@arcjet/node';
 

@@ -1,8 +1,18 @@
-// backend/src/models/Message.js
+// backend/src/models/Message.ts
 
 import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
-const messageSchema = new mongoose.Schema(
+export interface IMessage {
+  senderId: Types.ObjectId;
+  receiverId: Types.ObjectId;
+  text?: string;
+  image?: string;
+}
+
+export type MessageDocument = mongoose.HydratedDocument<IMessage>;
+
+const messageSchema = new mongoose.Schema<IMessage>(
   {
     // The ID of the user who sent this message
     // References the User model via ObjectId
@@ -11,7 +21,7 @@ const messageSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    // The ID of the user who sent this message
+    // The ID of the user who received this message
     // References the User model via ObjectId
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -42,4 +52,4 @@ const messageSchema = new mongoose.Schema(
 //  }
 // });
 
-export const Message = mongoose.model('Message', messageSchema);
+export const Message = mongoose.model<IMessage>('Message', messageSchema);

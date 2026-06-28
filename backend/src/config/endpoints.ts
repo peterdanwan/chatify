@@ -1,4 +1,11 @@
-// backend/src/config/endpoints.js
+// backend/src/config/endpoints.ts
+
+type EndpointValue = string | ((...args: unknown[]) => string);
+
+type EndpointGroup = {
+  BASE: string;
+  [key: string]: EndpointValue;
+};
 
 export const ENDPOINTS = {
   // Health check
@@ -26,13 +33,4 @@ export const ENDPOINTS = {
     BY_USER_ID: '/:id',
     SEND_TO_ID: '/send/:id',
   },
-};
-
-/**
- * Route prefixes for use in route registration
- */
-export const ENDPOINT_PREFIXES = {
-  HEALTH: ENDPOINTS.HEALTH.BASE,
-  AUTH: ENDPOINTS.AUTH.BASE,
-  MESSAGES: ENDPOINTS.MESSAGES.BASE,
-};
+} satisfies Record<string, EndpointGroup>;

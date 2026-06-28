@@ -2,6 +2,9 @@
 
 import jwt from 'jsonwebtoken';
 import { fileTypeFromBuffer } from 'file-type';
+import type { Response } from 'express';
+import { IUser } from '#models/User.js';
+
 // import mongoose from 'mongoose';
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -26,9 +29,9 @@ const { NODE_ENV, JWT_SECRET } = process.env;
  * - Payload is readable by anyone (not encrypted, just encoded)
  * - Signature ensures the token hasn't been tampered with
  */
-export const generateToken = (userId, res) => {
+export const generateToken = (userId: string, res: Response): string => {
   // Create JWT token containing the userId, signed with secret, expires in 7 days
-  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+  const token: string = jwt.sign({ userId }, JWT_SECRET as string, { expiresIn: '7d' });
 
   // res.cookie(name, value, optionsObject) is a built-in express method made for SENDING/SETTING cookies to the browser/client
   // res.cookies is for READING cookies from the browser/client, and requires the cookie-parser middleware
@@ -44,7 +47,7 @@ export const generateToken = (userId, res) => {
 };
 
 // Clear the "jwt" token created from generateToken (stored in the client's browser), effectively logging out the user
-export const clearToken = (res) => {
+export const clearToken = (res: Response): void => {
   // res.cookie(name, value, optionsObject) is a built-in express method made for SENDING/SETTING cookies to the browser/client
   // res.cookies is for READING cookies from the browser/client, and requires the cookie-parser middleware
   res.cookie('jwt', '', {
@@ -55,19 +58,21 @@ export const clearToken = (res) => {
   });
 };
 
-export const normalizeString = (value) => {
+export const normalizeString = (value: string): string => {
   return typeof value === 'string' ? value.trim() : '';
 };
 
-export const normalizeEmail = (email) => {
+export const normalizeEmail = (email: string): string => {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
 };
 
-export const normalizePassword = (password) => {
+export const normalizePassword = (password: string): string => {
   return typeof password === 'string' ? password : '';
 };
 
-export const normalizeInputs = (inputs) => {
+type NormalizedInputs = Pick<IUser, 'firstName' | 'lastName' | 'email' | 'password'>;
+
+export const normalizeInputs = (inputs: NormalizedInputs): NormalizedInputs => {
   return {
     firstName: normalizeString(inputs.firstName),
     lastName: normalizeString(inputs.lastName),
@@ -76,17 +81,17 @@ export const normalizeInputs = (inputs) => {
   };
 };
 
-export const validateEmail = (email) => {
+export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   return emailRegex.test(email);
 };
 
-export const validateSafePassword = (password) => {
+export const validateSafePassword = (password: string): boolean => {
   return password.length >= 6;
 };
 
-export const allStringsAreNotEmpty = (...values) => {
+export const allStringsAreNotEmpty = (...values: string[]) => {
   return values.every((value) => typeof value === 'string' && value.length > 0);
 };
 
@@ -101,7 +106,19 @@ export const allStringsAreNotEmpty = (...values) => {
 // };
 
 // Ref: https://www.npmjs.com/package/file-type
-export const validateBase64Image = async (base64String, maxSizeInMB = 5) => {
+
+type IValidatedBase64Image = {
+  isValid: boolean;
+  error?: string;
+  mimeType?: string;
+  declaredMimeType?: string;
+  mismatch?: boolean;
+};
+
+export const validateBase64Image = async (
+  base64String,
+  maxSizeInMB = 5
+): Promise<IValidatedBase64Image> => {
   if (!base64String || typeof base64String !== 'string') {
     return { isValid: false, error: 'Invalid image data' };
   }

@@ -1,7 +1,7 @@
 // backend/src/controllers/auth.controller.js
 
 import { createLogger } from '#config/logger.js';
-import { ENDPOINT_PREFIXES, ENDPOINTS } from '#config/endpoints.js';
+import { ENDPOINTS } from '#config/endpoints.js';
 import { User } from '#models/User.js';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeEmail } from '#emails/emailHandlers.js';
@@ -16,14 +16,13 @@ import {
 import cloudinary from '#lib/cloudinary.js';
 
 const log = createLogger(import.meta.url);
-const ENDPOINT_PREFIX = ENDPOINT_PREFIXES.AUTH;
-const { SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS.AUTH;
+const { BASE, SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS.AUTH;
 
 // Ref: https://mongoosejs.com/docs/api/model.html
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
 
 export const signup = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${SIGNUP}' (POST) endpoint reached`);
+  log.info(`'${BASE}${SIGNUP}' (POST) endpoint reached`);
 
   const { firstName, lastName, email, password } = normalizeInputs(req.body);
 
@@ -74,7 +73,7 @@ export const signup = async (req, res) => {
       const savedUser = await newUser.save();
       log.debug({ userId: savedUser._id }, 'New user saved to database');
 
-      generateToken(savedUser._id, res);
+      generateToken(savedUser._id.toString(), res);
       log.debug({ userId: savedUser._id }, 'JWT token generated');
 
       const fullName = `${savedUser.firstName} ${savedUser.lastName}`;
@@ -116,7 +115,7 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${LOGIN}' (POST) endpoint reached`);
+  log.info(`'${BASE}${LOGIN}' (POST) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
 
@@ -148,7 +147,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
     }
 
-    generateToken(loggedInUser._id, res);
+    generateToken(loggedInUser._id.toString(), res);
     log.debug({ userId: loggedInUser._id }, 'JWT token generated');
 
     const fullName = `${loggedInUser.firstName} ${loggedInUser.lastName}`;
@@ -173,7 +172,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (_, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${LOGOUT}' (POST) endpoint reached`);
+  log.info(`'${BASE}${LOGOUT}' (POST) endpoint reached`);
 
   clearToken(res);
   log.debug('JWT token cleared from response');
@@ -182,7 +181,7 @@ export const logout = (_, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${DELETE_USER}' (DELETE) endpoint reached`);
+  log.info(`'${BASE}${DELETE_USER}' (DELETE) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
 
@@ -229,7 +228,7 @@ export const deleteUser = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${UPDATE_PROFILE}' (PUT) endpoint reached`);
+  log.info(`'${BASE}${UPDATE_PROFILE}' (PUT) endpoint reached`);
 
   try {
     const { profilePic } = req.body;
@@ -260,7 +259,7 @@ export const updateProfile = async (req, res) => {
 };
 
 export const updatePreferences = async (req, res) => {
-  log.info(`'${ENDPOINT_PREFIX}/${PREFERENCES}' (PUT) endpoint reached`);
+  log.info(`'${BASE}${PREFERENCES}' (PUT) endpoint reached`);
 
   try {
     const { enableSound } = req.body;

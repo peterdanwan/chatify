@@ -1,4 +1,4 @@
-// backend/src/lib/db.js
+// backend/src/lib/db.ts
 
 import mongoose from 'mongoose';
 import { createLogger } from '#config/logger.js';

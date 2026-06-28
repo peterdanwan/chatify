@@ -1,4 +1,4 @@
-// backend/src/emails/emailHandlers.js
+// backend/src/emails/emailHandlers.ts
 
 import { createLogger } from '#config/logger.js';
 import { resendClient, sender } from '#lib/resend.js';
@@ -6,7 +6,11 @@ import { createWelcomeEmailTemplate } from '#emails/emailTemplates.js';
 
 const log = createLogger(import.meta.url);
 
-export const sendWelcomeEmail = async (email, name, clientURL) => {
+export const sendWelcomeEmail = async (
+  email: string,
+  name: string,
+  clientURL: string
+): Promise<void> => {
   // Ref: https://resend.com/docs/send-with-nodejs#2-send-email-using-html
 
   // Error handling
