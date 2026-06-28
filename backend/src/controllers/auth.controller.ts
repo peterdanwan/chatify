@@ -73,7 +73,7 @@ export const signup = async (req, res) => {
       const savedUser = await newUser.save();
       log.debug({ userId: savedUser._id }, 'New user saved to database');
 
-      generateToken(savedUser._id, res);
+      generateToken(savedUser._id.toString(), res);
       log.debug({ userId: savedUser._id }, 'JWT token generated');
 
       const fullName = `${savedUser.firstName} ${savedUser.lastName}`;
@@ -147,7 +147,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
     }
 
-    generateToken(loggedInUser._id, res);
+    generateToken(loggedInUser._id.toString(), res);
     log.debug({ userId: loggedInUser._id }, 'JWT token generated');
 
     const fullName = `${loggedInUser.firstName} ${loggedInUser.lastName}`;
