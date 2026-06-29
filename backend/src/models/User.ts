@@ -8,9 +8,12 @@ export interface IUser {
   email: string;
   firstName: string;
   lastName: string;
-  password: string;
+  password?: string; // optional: OAuth users don't have passwords
   profilePic: string;
   enableSound: boolean;
+  googleId?: string;
+  facebookId?: string;
+  githubId?: string;
 }
 
 // Full Mongoose Document shape: IUser fields + Mongoose-managed fields (_id, createdAt, updatedAt, methods)
@@ -36,7 +39,6 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     password: {
       type: String,
-      required: true,
       minLength: 6,
     },
     profilePic: {
@@ -47,6 +49,9 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: true,
     },
+    googleId: { type: String },
+    facebookId: { type: String },
+    githubId: { type: String },
   },
   { timestamps: true } // createdAt (member since...) + updatedAt (last login...)
 );

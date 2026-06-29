@@ -6,12 +6,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import session from 'express-session';
 
 /* Run dotEnv config before all other files that require env variables */
 import '#config/dotEnv.js';
 
 /* Import our custom modules */
 import { createLogger, shutDownLogger } from '#config/logger.js';
+// passport.ts imports logger.ts, so it must come after dotEnv to avoid reading LOG_LEVEL before it's set
+import passport from '#config/passport.js';
 import { ENDPOINTS } from '#config/endpoints.js';
 import { connectDB } from '#lib/db.js';
 
@@ -46,6 +49,29 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 // from the 'Cookie' header of a request and makes the cookies accessible through "req.cookies".
 // In contrast, "res.cookies(name, value, optionsObject)" lets us SET the value of a cookie per function call.
 app.use(cookieParser());
+
+// Session is used ONLY for the OAuth2 state parameter (CSRF protection during the OAuth handshake).
+// After the callback we issue a JWT cookie and the session is no longer needed.
+// ponytail: MemoryStore is fine for dev; swap to connect-redis (or similar) before going to production
+app.use(
+  session({
+    secret: process.env.JWT_SECRET as string,
+    resave: false,
+    saveUninitialized: false,
+    // sameSite: 'lax' is required — OAuth callbacks are cross-origin redirects and
+    // 'strict' would cause the browser to drop the session cookie on the return trip.
+    cookie: {
+      secure: process.env.NODE_ENV !== 'development',
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 5 * 60 * 1000, // 5 min: just enough to complete the OAuth handshake
+    },
+  })
+);
+
+// passport.initialize() wires passport into the request/response cycle.
+// We deliberately omit passport.session() — we use JWT cookies for auth, not sessions.
+app.use(passport.initialize());
 
 /* Health check endpoint - BEFORE other routes so it's always accessible */
 app.use(ENDPOINTS.HEALTH.BASE, healthCheckRoute);

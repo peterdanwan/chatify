@@ -23,6 +23,13 @@ export const ENDPOINTS = {
     LOGOUT: '/logout',
     UPDATE_PROFILE: '/update-profile',
     PREFERENCES: '/preferences',
+    // OAuth2 — initiation routes redirect the browser to the provider's login page
+    GOOGLE: '/google',
+    GOOGLE_CALLBACK: '/google/callback',
+    GITHUB: '/github',
+    GITHUB_CALLBACK: '/github/callback',
+    FACEBOOK: '/facebook',
+    FACEBOOK_CALLBACK: '/facebook/callback',
   },
 
   // Message endpoints
