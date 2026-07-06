@@ -17,6 +17,9 @@ export default defineConfig([
       globals: globals.node,
       parserOptions: { project: true },
     },
+    rules: {
+      '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
+    },
   },
   {
     ignores: ['package*.json'],
