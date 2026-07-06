@@ -139,6 +139,12 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
     }
 
+    // OAuth-only accounts have no password; reject silently to avoid revealing auth method
+    if (!loggedInUser.password) {
+      log.warn({ email }, 'Login attempt on OAuth-only account');
+      return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
+    }
+
     log.debug({ userId: loggedInUser._id }, 'Comparing password hash');
     const passwordMatches = await bcrypt.compare(password, loggedInUser.password);
 
@@ -197,6 +203,12 @@ export const deleteUser = async (req, res) => {
 
     if (!existingUser) {
       log.warn({ email }, 'Delete attempt for non-existent user');
+      return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
+    }
+
+    // OAuth-only accounts have no password
+    if (!existingUser.password) {
+      log.warn({ email }, 'Delete attempt on OAuth-only account');
       return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
     }
 
