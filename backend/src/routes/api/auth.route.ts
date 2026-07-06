@@ -1,5 +1,6 @@
-// backend/src/routes/api/auth.route.js
+// backend/src/routes/api/auth.route.ts
 
+import type { Request, Response } from 'express';
 import express from 'express';
 import { createLogger } from '#config/logger.js';
 import { ENDPOINTS } from '#config/endpoints.js';
@@ -14,11 +15,29 @@ import {
 
 import { protectRoute } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
+import passport from '#config/passport.js';
+import { generateToken } from '#lib/utils.js';
 
 const log = createLogger(import.meta.url);
 
 const router = express.Router();
-const { SIGNUP, LOGIN, LOGOUT, UPDATE_PROFILE, DELETE_USER, PREFERENCES, CHECK } = ENDPOINTS.AUTH;
+const {
+  SIGNUP,
+  LOGIN,
+  LOGOUT,
+  UPDATE_PROFILE,
+  DELETE_USER,
+  PREFERENCES,
+  CHECK,
+  GOOGLE,
+  GOOGLE_CALLBACK,
+  GITHUB,
+  GITHUB_CALLBACK,
+  FACEBOOK,
+  FACEBOOK_CALLBACK,
+} = ENDPOINTS.AUTH;
+
+const CLIENT_URL = process.env.CLIENT_URL as string;
 
 // RATE LIMITED PROTECTED ROUTES (via ARCJET):
 // -------------------------------------------
@@ -50,6 +69,49 @@ router.post(LOGIN, login);
 //    by simply embedding a link to the logout endpoint.
 router.post(LOGOUT, logout);
 
+// ─── OAuth2 routes ────────────────────────────────────────────────────────────
+//
+// INITIATION routes: browser navigates here → passport redirects to the provider's login page.
+// No JSON is returned; it's a 302 redirect (that's why the frontend uses window.location.href,
+// not fetch/axios).
+router.get(GOOGLE, passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(GITHUB, passport.authenticate('github', { scope: ['user:email'] }));
+router.get(FACEBOOK, passport.authenticate('facebook', { scope: ['email'] }));
+
+// CALLBACK routes: provider redirects back here with an auth code.
+// passport.authenticate exchanges the code for an access token, fetches the profile,
+// runs findOrCreateUser, then calls next() with req.user set.
+// On failure it redirects to CLIENT_URL with an error query param.
+function oauthSuccess(req: Request, res: Response) {
+  generateToken(req.user!._id.toString(), res);
+  res.redirect(CLIENT_URL);
+}
+
+router.get(
+  GOOGLE_CALLBACK,
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: `${CLIENT_URL}/login?error=google_oauth_failed`,
+  }),
+  oauthSuccess
+);
+router.get(
+  GITHUB_CALLBACK,
+  passport.authenticate('github', {
+    session: false,
+    failureRedirect: `${CLIENT_URL}/login?error=github_oauth_failed`,
+  }),
+  oauthSuccess
+);
+router.get(
+  FACEBOOK_CALLBACK,
+  passport.authenticate('facebook', {
+    session: false,
+    failureRedirect: `${CLIENT_URL}/login?error=facebook_oauth_failed`,
+  }),
+  oauthSuccess
+);
+
 // PROTECTED ROUTES:
 // -----------------
 // Applies ONLY to routes below this line
@@ -64,7 +126,7 @@ router.use(protectRoute);
 router.put(PREFERENCES, updatePreferences);
 router.put(UPDATE_PROFILE, updateProfile);
 router.delete(DELETE_USER, deleteUser);
-router.get(CHECK, (req, res) => res.status(200).json(req.user));
+router.get(CHECK, (req: Request, res: Response) => res.status(200).json(req.user));
 
 log.info('Initialized "auth" routes');
 
