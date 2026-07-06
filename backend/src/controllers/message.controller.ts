@@ -1,5 +1,6 @@
-// backend/src/controllers/message.controller.js
+// backend/src/controllers/message.controller.ts
 
+import type { Request, Response } from 'express';
 import { createLogger } from '#config/logger.js';
 import { ENDPOINTS } from '#config/endpoints.js';
 import cloudinary from '#lib/cloudinary.js';
@@ -11,14 +12,14 @@ import { getReceiverSocketId, io } from '#lib/socket.js';
 const log = createLogger(import.meta.url);
 const { BASE, CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
 
-export const getAllContacts = async (req, res) => {
+export const getAllContacts = async (req: Request, res: Response) => {
   log.info(`'${BASE}${CONTACTS}' (GET) endpoint reached`);
   try {
     // .id return a string representation of _id (i.e., _id.toString())
     //   e.g.: '507f1f77bcf86cd799439011'
     // ._id return an ObjectId instance / whatever type specified for _id (this is the thing stored in MongoDB)
     //   e.g.: ObjectId('507f1f77bcf86cd799439011')
-    const loggedInUserId = req.user._id;
+    const loggedInUserId = req.user!._id;
     log.debug({ loggedInUserId }, 'loggedInUserId');
 
     log.debug("Retrieving the logged-in user's contacts (without getting their passwords)");
@@ -32,12 +33,12 @@ export const getAllContacts = async (req, res) => {
   }
 };
 
-export const getChatPartners = async (req, res) => {
+export const getChatPartners = async (req: Request, res: Response) => {
   log.info(`'${BASE}${CHATS}' (GET) endpoint reached`);
 
   try {
-    const loggedInUserId = req.user._id;
-    const loggedInUserName = `${req.user.firstName} ${req.user.lastName}`;
+    const loggedInUserId = req.user!._id;
+    const loggedInUserName = `${req.user!.firstName} ${req.user!.lastName}`;
 
     log.debug(`Getting chat partners for ${loggedInUserName} (User ID: ${loggedInUserId})`);
 
@@ -74,11 +75,11 @@ export const getChatPartners = async (req, res) => {
   }
 };
 
-export const getMessagesByUserId = async (req, res) => {
+export const getMessagesByUserId = async (req: Request<{ id: string }>, res: Response) => {
   log.info(`'${BASE}${BY_USER_ID}' (GET) endpoint reached`);
 
   // Obtain req.user from our "protectRoute" middleware
-  const myId = req.user._id;
+  const myId = req.user!._id;
   const { id: userToChatId } = req.params;
 
   try {
@@ -104,13 +105,13 @@ export const getMessagesByUserId = async (req, res) => {
   }
 };
 
-export const sendMessage = async (req, res) => {
+export const sendMessage = async (req: Request<{ id: string }>, res: Response) => {
   log.info(`'${BASE}${SEND_TO_ID}' (POST) endpoint reached`);
 
   try {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
-    const senderId = req.user._id;
+    const senderId = req.user!._id;
 
     // Text and Image validation
     if (!text && !image) {

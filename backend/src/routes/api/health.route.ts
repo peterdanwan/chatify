@@ -1,4 +1,4 @@
-// backend/src/routes/api/health.route.js
+// backend/src/routes/api/health.route.ts
 
 import express from 'express';
 import { createLogger } from '#config/logger.js';

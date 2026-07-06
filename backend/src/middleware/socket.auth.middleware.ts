@@ -1,13 +1,17 @@
-// backend/src/middleware/socket.auth.middleware.js
+// backend/src/middleware/socket.auth.middleware.ts
 
+import type { Socket } from 'socket.io';
+import type { JwtPayload } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
 import { createLogger } from '#config/logger.js';
 import { User } from '#models/User.js';
 
 const log = createLogger(import.meta.url);
 
+type TokenPayload = JwtPayload & { userId: string };
+
 // The socket here is the user connect from the frontend
-export const socketAuthMiddleware = async (socket, next) => {
+export const socketAuthMiddleware = async (socket: Socket, next: (err?: Error) => void) => {
   try {
     // Extract token from http-only cookies
     const token = socket.handshake.headers.cookie
@@ -20,12 +24,8 @@ export const socketAuthMiddleware = async (socket, next) => {
       return next(new Error('Unauthorized - No Token Provided'));
     }
 
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      log.warn('Socket connection rejected: Invalid token');
-      return new new Error('Unauthorized - Invalid Token')();
-    }
+    // Verify the token — throws if invalid, so the catch block handles bad tokens
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as TokenPayload;
 
     // Find the user from the database
     const user = await User.findById(decoded.userId).select('-password');
@@ -42,7 +42,10 @@ export const socketAuthMiddleware = async (socket, next) => {
     log.info(`Socket authenticated for user: ${user.firstName} ${user.lastName} (${user._id})`);
     next();
   } catch (error) {
-    log.error({ err: error.message }, 'Error in socket authentication');
+    log.error(
+      { err: error instanceof Error ? error.message : error },
+      'Error in socket authentication'
+    );
     next(new Error('Unauthorized - Authentication failed'));
   }
 };

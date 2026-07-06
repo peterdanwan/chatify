@@ -18,10 +18,12 @@ import cloudinary from '#lib/cloudinary.js';
 const log = createLogger(import.meta.url);
 const { BASE, SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS.AUTH;
 
+import type { Request, Response } from 'express';
+
 // Ref: https://mongoosejs.com/docs/api/model.html
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
 
-export const signup = async (req, res) => {
+export const signup = async (req: Request, res: Response) => {
   log.info(`'${BASE}${SIGNUP}' (POST) endpoint reached`);
 
   const { firstName, lastName, email, password } = normalizeInputs(req.body);
@@ -92,12 +94,14 @@ export const signup = async (req, res) => {
 
       // Fire-and-forget; do not delay response based on email latency (i.e., don't use try-catch on this async function)
       log.debug({ email: savedUser.email }, 'Sending welcome email (fire-and-forget)');
-      sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL).catch((error) => {
-        // PW: err has a special meaning to pino. if we didn't put the key of "err" for error, the error wouldn't show up
-        // Ref: https://getpino.io/#/docs/api?id=error
-        // Ref: https://getpino.io/#/docs/api?id=mergingobject
-        log.error({ err: error, email: savedUser.email }, 'Error sending welcome email');
-      });
+      sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL as string).catch(
+        (error) => {
+          // PW: err has a special meaning to pino. if we didn't put the key of "err" for error, the error wouldn't show up
+          // Ref: https://getpino.io/#/docs/api?id=error
+          // Ref: https://getpino.io/#/docs/api?id=mergingobject
+          log.error({ err: error, email: savedUser.email }, 'Error sending welcome email');
+        }
+      );
     } else {
       log.warn('Failed to create new user instance.');
       res.status(400).json({ message: 'Invalid user data.' });
@@ -106,7 +110,12 @@ export const signup = async (req, res) => {
     log.error(error, 'Error in signup controller');
 
     // Handle race-condition: unique email constraint violation
-    if (error?.code === 11000 && (error.keyPattern?.email || error.keyValue?.email)) {
+    const e = error as {
+      code?: number;
+      keyPattern?: Record<string, unknown>;
+      keyValue?: Record<string, unknown>;
+    };
+    if (e?.code === 11000 && (e.keyPattern?.['email'] || e.keyValue?.['email'])) {
       return res.status(409).json({ message: 'Email already exists' });
     }
 
@@ -114,7 +123,7 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req: Request, res: Response) => {
   log.info(`'${BASE}${LOGIN}' (POST) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
@@ -177,7 +186,7 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = (_, res) => {
+export const logout = (_req: Request, res: Response) => {
   log.info(`'${BASE}${LOGOUT}' (POST) endpoint reached`);
 
   clearToken(res);
@@ -186,7 +195,7 @@ export const logout = (_, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req: Request, res: Response) => {
   log.info(`'${BASE}${DELETE_USER}' (DELETE) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
@@ -239,7 +248,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req: Request, res: Response) => {
   log.info(`'${BASE}${UPDATE_PROFILE}' (PUT) endpoint reached`);
 
   try {
@@ -252,7 +261,7 @@ export const updateProfile = async (req, res) => {
 
     // The "protectRoute" middleware lets us access the user directly from the "req" object.
     // Without the setup in our middleware, req.user would be undefined and we would have broken code.
-    const userId = req.user._id;
+    const userId = req.user!._id;
 
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
 
@@ -270,12 +279,12 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const updatePreferences = async (req, res) => {
+export const updatePreferences = async (req: Request, res: Response) => {
   log.info(`'${BASE}${PREFERENCES}' (PUT) endpoint reached`);
 
   try {
     const { enableSound } = req.body;
-    const userId = req.user._id;
+    const userId = req.user!._id;
 
     if (typeof enableSound !== 'boolean') {
       log.warn('Invalid preference value');

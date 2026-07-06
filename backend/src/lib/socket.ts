@@ -15,7 +15,7 @@ const server = stoppable(http.createServer(app));
 // io = socket server
 const io = new Server(server, {
   cors: {
-    origin: [process.env.CLIENT_URL],
+    origin: [process.env.CLIENT_URL as string],
     credentials: true,
   },
 });
@@ -24,7 +24,7 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // Use this function to check if the user is online or not
-export function getReceiverSocketId(userId: string): Set<string> {
+export function getReceiverSocketId(userId: string): Set<string> | undefined {
   return userSocketMap.get(userId);
 }
 
@@ -50,7 +50,7 @@ io.on('connection', (socket: Socket) => {
   // - With socket.ion, we listen for events from clients
   socket.on('disconnect', () => {
     log.info(`${firstName} ${lastName} disconnected`);
-    const sockets: Set<string> = userSocketMap.get(userId);
+    const sockets = userSocketMap.get(userId);
 
     if (sockets) {
       sockets.delete(socket.id);

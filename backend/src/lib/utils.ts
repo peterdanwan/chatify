@@ -3,7 +3,6 @@
 import jwt from 'jsonwebtoken';
 import { fileTypeFromBuffer } from 'file-type';
 import type { Response } from 'express';
-import { IUser } from '#models/User.js';
 
 // import mongoose from 'mongoose';
 
@@ -66,11 +65,16 @@ export const normalizeEmail = (email: string): string => {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
 };
 
-export const normalizePassword = (password: string): string => {
+export const normalizePassword = (password: string | undefined): string => {
   return typeof password === 'string' ? password : '';
 };
 
-type NormalizedInputs = Pick<IUser, 'firstName' | 'lastName' | 'email' | 'password'>;
+type NormalizedInputs = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+};
 
 export const normalizeInputs = (inputs: NormalizedInputs): NormalizedInputs => {
   return {
@@ -116,7 +120,7 @@ type IValidatedBase64Image = {
 };
 
 export const validateBase64Image = async (
-  base64String,
+  base64String: string,
   maxSizeInMB = 5
 ): Promise<IValidatedBase64Image> => {
   if (!base64String || typeof base64String !== 'string') {

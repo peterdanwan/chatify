@@ -31,7 +31,7 @@ export function createWelcomeEmailTemplate(name: string, clientURL: string): str
     new URL(clientURL);
   } catch (error) {
     log.error(error, 'Invalid clientURL:');
-    throw new Error(error);
+    throw new Error(error instanceof Error ? error.message : String(error));
   }
 
   // HTML escape function to prevent XSS (i.e., Cross-Site Scripting)
