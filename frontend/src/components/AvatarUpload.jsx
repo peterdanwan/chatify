@@ -35,7 +35,12 @@ function AvatarUpload({ imageSrc, isUpdating, onFileSelect }) {
       >
         {/* ── Image or fallback icon ── */}
         {imageSrc ? (
-          <img src={imageSrc} alt="User avatar" className="size-full object-cover" />
+          <img
+            src={imageSrc}
+            alt="User avatar"
+            className="size-full object-cover"
+            referrerPolicy="no-referrer"
+          />
         ) : (
           // Ref: https://lucide.dev/icons/circle-user-round
           <CircleUserRound strokeWidth={1.2} className="size-full" />

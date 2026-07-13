@@ -11,8 +11,9 @@ import { Link } from 'react-router';
 function DeleteUserPage() {
   const { authUser, deleteUser, isDeletingUser } = useAuthStore();
 
-  // Pre-populate email from the authenticated user so they can't accidentally
-  // delete a different account. They still must type their password to confirm.
+  // Email is shown read-only purely so the user can confirm which account this is —
+  // the backend identifies the account from the session, not from this field.
+  // Password confirmation only applies to accounts that have one (OAuth-only accounts don't).
   const [formData, setFormData] = useState({
     email: authUser?.email ?? '',
     password: '',
@@ -53,9 +54,6 @@ function DeleteUserPage() {
                 id="email"
                 value={formData.email}
                 type="email"
-                // The email is locked to the authenticated user's address.
-                // The backend verifies it anyway, but making it read-only prevents
-                // any accidental mismatch on the client side.
                 readOnly
                 onChange={() => {}}
                 placeholder="your@email.com"
@@ -63,23 +61,30 @@ function DeleteUserPage() {
                 className="opacity-60 cursor-not-allowed"
               />
 
-              {/* Password */}
-              <div>
-                <label htmlFor="password" className="auth-input-label">
-                  Password
-                </label>
-                <div className="relative">
-                  <LockIcon className="auth-input-icon" />
-                  <input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="input"
-                    placeholder="Enter your password"
-                  />
+              {/* Password confirmation only applies to accounts that have one */}
+              {authUser?.hasPassword ? (
+                <div>
+                  <label htmlFor="password" className="auth-input-label">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <LockIcon className="auth-input-icon" />
+                    <input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="input"
+                      placeholder="Enter your password"
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-slate-400 text-sm">
+                  Your account is signed in via Google, GitHub, or Facebook — no password to
+                  confirm.
+                </p>
+              )}
 
               {/* Submit — error variant signals the destructive nature of the action */}
               <SubmitButton isLoading={isDeletingUser} variant="error">

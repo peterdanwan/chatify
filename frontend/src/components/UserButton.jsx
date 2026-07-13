@@ -12,7 +12,7 @@ function UserButton({ user }) {
       key={user._id}
       className="w-full bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 focus-visible:bg-cyan-500/20 transition-colors tooltip tooltip-info tooltip-bottom"
       onClick={() => setSelectedUser(user)}
-      data-tip={`${user.firstName} ${user.lastName}`}
+      data-tip={user.displayName}
     >
       <div className="flex items-center gap-3">
         <div
@@ -21,11 +21,12 @@ function UserButton({ user }) {
           <div className="size-12 rounded-full">
             <img
               src={user.profilePic || '/avatar.png'}
-              alt={`${user.firstName} ${user.lastName}`}
+              alt={user.displayName}
+              referrerPolicy="no-referrer"
             />
           </div>
         </div>
-        <h4 className="text-slate-200 font-medium truncate">{`${user.firstName} ${user.lastName}`}</h4>
+        <h4 className="text-slate-200 font-medium truncate">{user.displayName}</h4>
       </div>
     </button>
   );

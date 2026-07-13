@@ -15,7 +15,7 @@ const server = stoppable(http.createServer(app));
 // io = socket server
 const io = new Server(server, {
   cors: {
-    origin: [process.env.CLIENT_URL],
+    origin: [process.env.CLIENT_URL as string],
     credentials: true,
   },
 });
@@ -24,7 +24,7 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // Use this function to check if the user is online or not
-export function getReceiverSocketId(userId: string): Set<string> {
+export function getReceiverSocketId(userId: string): Set<string> | undefined {
   return userSocketMap.get(userId);
 }
 
@@ -34,9 +34,8 @@ const userSocketMap = new Map<string, Set<string>>();
 
 // 1. Detect when someone goes online
 io.on('connection', (socket: Socket) => {
-  const firstName: string = socket.user.firstName;
-  const lastName: string = socket.user.lastName;
-  log.info(`${firstName} ${lastName} connected`);
+  const displayName: string = socket.user.displayName;
+  log.info(`${displayName} connected`);
 
   const userId: string = socket.userId;
   const sockets: Set<string> = userSocketMap.get(userId) ?? new Set<string>();
@@ -49,8 +48,8 @@ io.on('connection', (socket: Socket) => {
   // 3. Detect when someone goes offline
   // - With socket.ion, we listen for events from clients
   socket.on('disconnect', () => {
-    log.info(`${firstName} ${lastName} disconnected`);
-    const sockets: Set<string> = userSocketMap.get(userId);
+    log.info(`${displayName} disconnected`);
+    const sockets = userSocketMap.get(userId);
 
     if (sockets) {
       sockets.delete(socket.id);

@@ -49,6 +49,9 @@ export const useAuthStore = create((set, get) => ({
   // A loading state for when the user is updating their profile picture
   isUpdatingProfile: false,
 
+  // A loading state for when the user is updating their displayName/username
+  isUpdatingAccount: false,
+
   // A loading state for account deletion
   isDeletingUser: false,
 
@@ -153,6 +156,28 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  // Updates displayName and/or username. Used both by the one-time username claim
+  // screen (new OAuth accounts) and by settings edits later on.
+  // Returns true/false so callers (e.g. the claim screen) know whether to proceed.
+  updateAccount: async (data) => {
+    set({ isUpdatingAccount: true });
+
+    try {
+      const res = await axiosInstance.put('/auth/account', data);
+      set({ authUser: res.data });
+      toast.success('Account updated');
+      get().connectSocket(); // no-op if already connected; needed right after claiming a username
+      return true;
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      console.error('Error with updateAccount', error);
+      return false;
+    } finally {
+      set({ isUpdatingAccount: false });
+    }
+  },
+
   // Sends a DELETE request after re-verifying the user's email + password before deletion
   // On success:
   // 1. clears the auth cookie (server-side)
@@ -183,8 +208,13 @@ export const useAuthStore = create((set, get) => ({
     const { authUser } = get();
     const existingSocketConnection = get().socket;
 
-    // Prevents socket connection for unauthenticated user / if there's a connection for the client already
-    if (!authUser || existingSocketConnection?.connected || existingSocketConnection?.active) {
+    // Prevents socket connection for unauthenticated/pending-username users, or if there's
+    // already a connection for the client (the server rejects sockets with no username anyway)
+    if (
+      !authUser?.username ||
+      existingSocketConnection?.connected ||
+      existingSocketConnection?.active
+    ) {
       return;
     }
 

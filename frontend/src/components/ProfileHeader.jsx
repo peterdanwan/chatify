@@ -54,7 +54,7 @@ function ProfileHeader() {
           />
           <div>
             <h3 className="text-slate-200 font-medium text-sm small:text-base truncate tooltip tooltip-right max-w-45">
-              {`${authUser.firstName} ${authUser.lastName}`}
+              {authUser.displayName}
             </h3>
 
             <p className="text-slate-400 text-xs">Online</p>

@@ -3,7 +3,7 @@
 import jwt from 'jsonwebtoken';
 import { fileTypeFromBuffer } from 'file-type';
 import type { Response } from 'express';
-import { IUser } from '#models/User.js';
+import type { UserDocument } from '#models/User.js';
 
 // import mongoose from 'mongoose';
 
@@ -66,17 +66,22 @@ export const normalizeEmail = (email: string): string => {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
 };
 
-export const normalizePassword = (password: string): string => {
+export const normalizePassword = (password: string | undefined): string => {
   return typeof password === 'string' ? password : '';
 };
 
-type NormalizedInputs = Pick<IUser, 'firstName' | 'lastName' | 'email' | 'password'>;
+type NormalizedInputs = {
+  displayName: string;
+  username: string;
+  email: string;
+  password: string;
+};
 
-export const normalizeInputs = (inputs: NormalizedInputs): NormalizedInputs => {
+export const normalizeInputs = (inputs: Partial<NormalizedInputs>): NormalizedInputs => {
   return {
-    firstName: normalizeString(inputs.firstName),
-    lastName: normalizeString(inputs.lastName),
-    email: normalizeEmail(inputs.email),
+    displayName: normalizeString(inputs.displayName ?? ''),
+    username: normalizeString(inputs.username ?? '').toLowerCase(),
+    email: normalizeEmail(inputs.email ?? ''),
     password: normalizePassword(inputs.password),
   };
 };
@@ -91,9 +96,28 @@ export const validateSafePassword = (password: string): boolean => {
   return password.length >= 6;
 };
 
+// Lowercase letters, digits, underscore; 3-20 chars. Matches the lowercase: true on the schema field.
+export const validateUsername = (username: string): boolean => {
+  return /^[a-z0-9_]{3,20}$/.test(username);
+};
+
 export const allStringsAreNotEmpty = (...values: string[]) => {
   return values.every((value) => typeof value === 'string' && value.length > 0);
 };
+
+// The one place that decides what a user document is allowed to look like once it leaves
+// the server. Every route that returns a user must go through this — never res.json(userDoc)
+// directly — so the password hash can never leak, and the frontend gets hasPassword instead
+// (needed to know whether to show a password field, e.g. on account deletion).
+export const toPublicUser = (user: UserDocument) => ({
+  _id: user._id,
+  displayName: user.displayName,
+  username: user.username,
+  email: user.email,
+  profilePic: user.profilePic,
+  enableSound: user.enableSound,
+  hasPassword: Boolean(user.password),
+});
 
 // export const validateObjectId = (paramName) => {
 //   return (req, res, next) => {
@@ -116,7 +140,7 @@ type IValidatedBase64Image = {
 };
 
 export const validateBase64Image = async (
-  base64String,
+  base64String: string,
   maxSizeInMB = 5
 ): Promise<IValidatedBase64Image> => {
   if (!base64String || typeof base64String !== 'string') {

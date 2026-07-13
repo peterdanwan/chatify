@@ -22,15 +22,31 @@ export const ENDPOINTS = {
     LOGIN: '/login',
     LOGOUT: '/logout',
     UPDATE_PROFILE: '/update-profile',
+    ACCOUNT: '/account',
     PREFERENCES: '/preferences',
+    // OAuth2 — initiation routes redirect the browser to the provider's login page
+    GOOGLE: '/google',
+    GOOGLE_CALLBACK: '/google/callback',
+    GITHUB: '/github',
+    GITHUB_CALLBACK: '/github/callback',
+    FACEBOOK: '/facebook',
+    FACEBOOK_CALLBACK: '/facebook/callback',
   },
 
   // Message endpoints
   MESSAGES: {
     BASE: '/api/messages',
-    CONTACTS: '/contacts',
     CHATS: '/chats',
     BY_USER_ID: '/:id',
     SEND_TO_ID: '/send/:id',
+  },
+
+  // Contact request endpoints — mutual accept required before two users can message each other
+  CONTACTS: {
+    BASE: '/api/contacts',
+    LIST: '/',
+    REQUESTS: '/requests',
+    ACCEPT: '/requests/:id/accept',
+    REMOVE: '/requests/:id',
   },
 } satisfies Record<string, EndpointGroup>;

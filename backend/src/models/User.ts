@@ -6,11 +6,17 @@ import mongoose from 'mongoose';
 // To be imported in socket.io.d.ts and express.d.ts to describe the user attached to req.user and socket.user
 export interface IUser {
   email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
+  displayName: string;
+  // Unique handle used for adding/finding people. Optional at the schema level because
+  // a freshly-created OAuth account has none yet — see requireUsername middleware, which
+  // gates chat features until the user claims one.
+  username?: string;
+  password?: string; // optional: OAuth users don't have passwords
   profilePic: string;
   enableSound: boolean;
+  googleId?: string;
+  facebookId?: string;
+  githubId?: string;
 }
 
 // Full Mongoose Document shape: IUser fields + Mongoose-managed fields (_id, createdAt, updatedAt, methods)
@@ -26,17 +32,19 @@ const userSchema = new mongoose.Schema<IUser>(
       required: true,
       unique: true,
     },
-    firstName: {
+    displayName: {
       type: String,
       required: true,
     },
-    lastName: {
+    username: {
       type: String,
-      required: true,
+      unique: true,
+      sparse: true, // lets multiple users have no username yet (pending OAuth claim)
+      lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
-      required: true,
       minLength: 6,
     },
     profilePic: {
@@ -47,6 +55,9 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: true,
     },
+    googleId: { type: String },
+    facebookId: { type: String },
+    githubId: { type: String },
   },
   { timestamps: true } // createdAt (member since...) + updatedAt (last login...)
 );

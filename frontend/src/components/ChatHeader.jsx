@@ -34,8 +34,9 @@ export default function ChatHeader() {
             {selectedUser.profilePic ? (
               <img
                 src={selectedUser.profilePic}
-                alt={`${selectedUser.firstName} ${selectedUser.lastName}`}
+                alt={selectedUser.displayName}
                 className="size-full object-cover"
+                referrerPolicy="no-referrer"
               />
             ) : (
               // Ref: https://lucide.dev/icons/circle-user-round
@@ -46,8 +47,10 @@ export default function ChatHeader() {
         <div>
           <h3
             className="text-slate-200 font-medium tooltip tooltip-top"
-            data-tip={`${selectedUser.firstName} ${selectedUser.lastName}`}
-          >{`${selectedUser.firstName} ${selectedUser.lastName}`}</h3>
+            data-tip={selectedUser.displayName}
+          >
+            {selectedUser.displayName}
+          </h3>
           <p className="text-slate-400 text-sm">{isOnline ? 'Online' : 'Offline'}</p>
         </div>
       </div>

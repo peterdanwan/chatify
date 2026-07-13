@@ -11,23 +11,28 @@ import {
   normalizeInputs,
   validateEmail,
   validateSafePassword,
+  validateUsername,
   allStringsAreNotEmpty,
+  toPublicUser,
 } from '#lib/utils.js';
 import cloudinary from '#lib/cloudinary.js';
 
 const log = createLogger(import.meta.url);
-const { BASE, SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES } = ENDPOINTS.AUTH;
+const { BASE, SIGNUP, LOGIN, LOGOUT, DELETE_USER, UPDATE_PROFILE, PREFERENCES, ACCOUNT } =
+  ENDPOINTS.AUTH;
+
+import type { Request, Response } from 'express';
 
 // Ref: https://mongoosejs.com/docs/api/model.html
 // PW: Reference the link above to find different CRUD operations methods and more for your Mongoose Models
 
-export const signup = async (req, res) => {
+export const signup = async (req: Request, res: Response) => {
   log.info(`'${BASE}${SIGNUP}' (POST) endpoint reached`);
 
-  const { firstName, lastName, email, password } = normalizeInputs(req.body);
+  const { displayName, username, email, password } = normalizeInputs(req.body);
 
   try {
-    if (!allStringsAreNotEmpty(firstName, lastName, email, password)) {
+    if (!allStringsAreNotEmpty(displayName, username, email, password)) {
       log.warn('Sign up attempt with missing required fields');
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -35,6 +40,13 @@ export const signup = async (req, res) => {
     if (!validateEmail(email)) {
       log.warn({ email }, 'Sign up attempt with invalid email format');
       return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    if (!validateUsername(username)) {
+      log.warn({ username }, 'Sign up attempt with invalid username format');
+      return res.status(400).json({
+        message: 'Username must be 3-20 characters: lowercase letters, numbers, underscore only',
+      });
     }
 
     if (!validateSafePassword(password)) {
@@ -54,14 +66,21 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: 'Account with this email already exists.' });
     }
 
+    const existingUsername = await User.findOne({ username }).exec();
+
+    if (existingUsername) {
+      log.warn({ username }, 'Sign up attempt with username that already exists');
+      return res.status(409).json({ message: 'Username is already taken' });
+    }
+
     log.debug('Hashing password for new user');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Proceed with creating a user
     const newUser = new User({
-      firstName,
-      lastName,
+      displayName,
+      username,
       email,
       password: hashedPassword,
     });
@@ -76,28 +95,23 @@ export const signup = async (req, res) => {
       generateToken(savedUser._id.toString(), res);
       log.debug({ userId: savedUser._id }, 'JWT token generated');
 
-      const fullName = `${savedUser.firstName} ${savedUser.lastName}`;
       log.info(
         { userId: savedUser._id, email: savedUser.email },
-        `New user "${fullName}" successfully created`
+        `New user "${displayName}" successfully created`
       );
 
-      res.status(201).json({
-        _id: savedUser._id,
-        firstName,
-        lastName,
-        email: savedUser.email,
-        profilePic: savedUser.profilePic,
-      });
+      res.status(201).json(toPublicUser(savedUser));
 
       // Fire-and-forget; do not delay response based on email latency (i.e., don't use try-catch on this async function)
       log.debug({ email: savedUser.email }, 'Sending welcome email (fire-and-forget)');
-      sendWelcomeEmail(savedUser.email, fullName, process.env.CLIENT_URL).catch((error) => {
-        // PW: err has a special meaning to pino. if we didn't put the key of "err" for error, the error wouldn't show up
-        // Ref: https://getpino.io/#/docs/api?id=error
-        // Ref: https://getpino.io/#/docs/api?id=mergingobject
-        log.error({ err: error, email: savedUser.email }, 'Error sending welcome email');
-      });
+      sendWelcomeEmail(savedUser.email, displayName, process.env.CLIENT_URL as string).catch(
+        (error) => {
+          // PW: err has a special meaning to pino. if we didn't put the key of "err" for error, the error wouldn't show up
+          // Ref: https://getpino.io/#/docs/api?id=error
+          // Ref: https://getpino.io/#/docs/api?id=mergingobject
+          log.error({ err: error, email: savedUser.email }, 'Error sending welcome email');
+        }
+      );
     } else {
       log.warn('Failed to create new user instance.');
       res.status(400).json({ message: 'Invalid user data.' });
@@ -106,15 +120,24 @@ export const signup = async (req, res) => {
     log.error(error, 'Error in signup controller');
 
     // Handle race-condition: unique email constraint violation
-    if (error?.code === 11000 && (error.keyPattern?.email || error.keyValue?.email)) {
+    const e = error as {
+      code?: number;
+      keyPattern?: Record<string, unknown>;
+      keyValue?: Record<string, unknown>;
+    };
+    if (e?.code === 11000 && (e.keyPattern?.['email'] || e.keyValue?.['email'])) {
       return res.status(409).json({ message: 'Email already exists' });
+    }
+
+    if (e?.code === 11000 && (e.keyPattern?.['username'] || e.keyValue?.['username'])) {
+      return res.status(409).json({ message: 'Username is already taken' });
     }
 
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req: Request, res: Response) => {
   log.info(`'${BASE}${LOGIN}' (POST) endpoint reached`);
 
   const { email, password } = normalizeInputs(req.body);
@@ -139,6 +162,12 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
     }
 
+    // OAuth-only accounts have no password; reject silently to avoid revealing auth method
+    if (!loggedInUser.password) {
+      log.warn({ email }, 'Login attempt on OAuth-only account');
+      return res.status(401).json({ message: 'Invalid credentials. Cannot log in' });
+    }
+
     log.debug({ userId: loggedInUser._id }, 'Comparing password hash');
     const passwordMatches = await bcrypt.compare(password, loggedInUser.password);
 
@@ -150,19 +179,12 @@ export const login = async (req, res) => {
     generateToken(loggedInUser._id.toString(), res);
     log.debug({ userId: loggedInUser._id }, 'JWT token generated');
 
-    const fullName = `${loggedInUser.firstName} ${loggedInUser.lastName}`;
     log.info(
       { userId: loggedInUser._id, email: loggedInUser.email },
-      `User ${fullName} successfully signed in`
+      `User ${loggedInUser.displayName} successfully signed in`
     );
 
-    res.status(200).json({
-      _id: loggedInUser._id,
-      firstName: loggedInUser.firstName,
-      lastName: loggedInUser.lastName,
-      email: loggedInUser.email,
-      profilePic: loggedInUser.profilePic,
-    });
+    res.status(200).json(toPublicUser(loggedInUser));
   } catch (error) {
     // Ref: https://getpino.io/#/docs/api?id=mergingobject
     // Ref: https://getpino.io/#/docs/api?id=error
@@ -171,7 +193,7 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = (_, res) => {
+export const logout = (_req: Request, res: Response) => {
   log.info(`'${BASE}${LOGOUT}' (POST) endpoint reached`);
 
   clearToken(res);
@@ -180,38 +202,45 @@ export const logout = (_, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req: Request, res: Response) => {
   log.info(`'${BASE}${DELETE_USER}' (DELETE) endpoint reached`);
 
-  const { email, password } = normalizeInputs(req.body);
-
-  // Validate required fields
-  if (!allStringsAreNotEmpty(email, password)) {
-    log.warn('Delete user attempt with missing required fields');
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
+  // protectRoute already proved identity via a valid JWT, so we act on req.user's id
+  // rather than re-deriving the target from the request body.
+  const userId = req.user!._id;
+  const { password } = normalizeInputs(req.body);
 
   try {
-    log.debug({ email }, 'Looking up user for deletion');
-    const existingUser = await User.findOne({ email }).exec();
+    // protectRoute's query excludes the password field, so re-fetch it here.
+    // This document is never sent in a response, so there's no leak risk.
+    const existingUser = await User.findById(userId).exec();
 
     if (!existingUser) {
-      log.warn({ email }, 'Delete attempt for non-existent user');
-      return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
+      log.warn({ userId }, 'Delete attempt for non-existent user');
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    log.debug({ userId: existingUser._id }, 'Verifying password for user deletion');
-    const passwordMatches = await bcrypt.compare(password, existingUser.password);
+    // Only local accounts have a password to re-verify. OAuth-only accounts
+    // are already authenticated via the JWT, so there's nothing further to check.
+    if (existingUser.password) {
+      if (!password) {
+        log.warn({ userId }, 'Delete user attempt with missing password');
+        return res.status(400).json({ message: 'Password is required' });
+      }
 
-    if (!passwordMatches) {
-      log.warn({ userId: existingUser._id, email }, 'Delete attempt with incorrect password');
-      return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
+      log.debug({ userId }, 'Verifying password for user deletion');
+      const passwordMatches = await bcrypt.compare(password, existingUser.password);
+
+      if (!passwordMatches) {
+        log.warn({ userId }, 'Delete attempt with incorrect password');
+        return res.status(401).json({ message: 'Invalid credentials. Cannot delete' });
+      }
     }
 
-    log.debug({ userId: existingUser._id, email }, 'Deleting user from database');
-    await User.findByIdAndDelete(existingUser._id);
+    log.debug({ userId }, 'Deleting user from database');
+    await User.findByIdAndDelete(userId);
     log.info(
-      { userId: existingUser._id, email },
+      { userId, email: existingUser.email },
       `User ${existingUser.email} successfully deleted`
     );
 
@@ -227,7 +256,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req: Request, res: Response) => {
   log.info(`'${BASE}${UPDATE_PROFILE}' (PUT) endpoint reached`);
 
   try {
@@ -240,7 +269,7 @@ export const updateProfile = async (req, res) => {
 
     // The "protectRoute" middleware lets us access the user directly from the "req" object.
     // Without the setup in our middleware, req.user would be undefined and we would have broken code.
-    const userId = req.user._id;
+    const userId = req.user!._id;
 
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
 
@@ -249,33 +278,87 @@ export const updateProfile = async (req, res) => {
       userId,
       { profilePic: uploadResponse.secure_url },
       { new: true }
-    ).select('-password');
+    );
 
-    res.status(201).json(updatedUser);
+    res.status(201).json(toPublicUser(updatedUser!));
   } catch (error) {
     log.error(error, 'Error in updateProfile controller');
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-export const updatePreferences = async (req, res) => {
+// Handles both the one-time username claim (new OAuth users) and later edits to
+// displayName/username from settings. Either field is optional; only what's provided is validated + saved.
+export const updateAccount = async (req: Request, res: Response) => {
+  log.info(`'${BASE}${ACCOUNT}' (PUT) endpoint reached`);
+
+  try {
+    const displayName = normalizeInputs({ displayName: req.body.displayName }).displayName;
+    const username = normalizeInputs({ username: req.body.username }).username;
+    const userId = req.user!._id;
+
+    const updates: { displayName?: string; username?: string } = {};
+
+    if (req.body.displayName !== undefined) {
+      if (!displayName) {
+        log.warn({ userId }, 'Update account attempt with empty displayName');
+        return res.status(400).json({ message: 'Display name cannot be empty' });
+      }
+      updates.displayName = displayName;
+    }
+
+    if (req.body.username !== undefined) {
+      if (!validateUsername(username)) {
+        log.warn({ userId }, 'Update account attempt with invalid username format');
+        return res.status(400).json({
+          message: 'Username must be 3-20 characters: lowercase letters, numbers, underscore only',
+        });
+      }
+
+      const existingUsername = await User.findOne({ username, _id: { $ne: userId } }).exec();
+      if (existingUsername) {
+        log.warn({ userId, username }, 'Update account attempt with username already taken');
+        return res.status(409).json({ message: 'Username is already taken' });
+      }
+
+      updates.username = username;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: 'Nothing to update' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
+
+    log.info({ userId, updates: Object.keys(updates) }, 'Account updated');
+    res.status(200).json(toPublicUser(updatedUser!));
+  } catch (error) {
+    const e = error as { code?: number; keyPattern?: Record<string, unknown> };
+    if (e?.code === 11000 && e.keyPattern?.['username']) {
+      return res.status(409).json({ message: 'Username is already taken' });
+    }
+
+    log.error(error, 'Error in updateAccount controller');
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updatePreferences = async (req: Request, res: Response) => {
   log.info(`'${BASE}${PREFERENCES}' (PUT) endpoint reached`);
 
   try {
     const { enableSound } = req.body;
-    const userId = req.user._id;
+    const userId = req.user!._id;
 
     if (typeof enableSound !== 'boolean') {
       log.warn('Invalid preference value');
       return res.status(400).json({ message: 'enableSound must be a boolean' });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(userId, { enableSound }, { new: true }).select(
-      '-password'
-    );
+    const updatedUser = await User.findByIdAndUpdate(userId, { enableSound }, { new: true });
 
     log.info({ userId, enableSound }, 'User preferences updated');
-    res.status(200).json(updatedUser);
+    res.status(200).json(toPublicUser(updatedUser!));
   } catch (error) {
     log.error(error, 'Error in updatePreferences controller');
     res.status(500).json({ message: 'Internal server error' });

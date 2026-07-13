@@ -10,7 +10,7 @@ const mode = (ARCJET_ENV ?? NODE_ENV) === 'production' ? 'LIVE' : 'DRY_RUN';
 // Ref: https://docs.arcjet.com/get-started?f=node-js-express
 export const aj = arcjet({
   // Get your site key from https://app.arcjet.com and set it as an environment variable rather than hard coding.
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     // Shield protects your app from common attacks e.g., a SQL injection
     shield({ mode }),

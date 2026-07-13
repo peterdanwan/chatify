@@ -5,14 +5,14 @@ import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import FormInput from '../components/FormInput';
 import SubmitButton from '../components/SubmitButton';
-import { LockIcon, MailIcon, UserIcon } from 'lucide-react';
+import { AtSignIcon, LockIcon, MailIcon, UserIcon } from 'lucide-react';
 
 function SignUpForm() {
   const { signup, isSigningUp } = useAuthStore();
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    displayName: '',
+    username: '',
     email: '',
     password: '',
   });
@@ -28,24 +28,24 @@ function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
-      {/* First Name */}
+      {/* Name */}
       <FormInput
-        label="First Name"
-        id="first-name"
-        value={formData.firstName}
-        onChange={(e) => handleInputChange(e, 'firstName')}
-        placeholder="John"
+        label="Name"
+        id="display-name"
+        value={formData.displayName}
+        onChange={(e) => handleInputChange(e, 'displayName')}
+        placeholder="John Doe"
         icon={UserIcon}
       />
 
-      {/* Last Name */}
+      {/* Username */}
       <FormInput
-        label="Last Name"
-        id="last-name"
-        value={formData.lastName}
-        onChange={(e) => handleInputChange(e, 'lastName')}
-        placeholder="Doe"
-        icon={UserIcon}
+        label="Username"
+        id="username"
+        value={formData.username}
+        onChange={(e) => handleInputChange(e, 'username')}
+        placeholder="johndoe"
+        icon={AtSignIcon}
       />
 
       {/* Email */}
