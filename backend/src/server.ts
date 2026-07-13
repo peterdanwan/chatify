@@ -23,6 +23,7 @@ import { app, server } from '#lib/socket.js';
 import healthCheckRoute from '#routes/api/health.route.js';
 import authRoutes from '#routes/api/auth.route.js';
 import messageRoutes from '#routes/api/message.route.js';
+import contactRoutes from '#routes/api/contact.route.js';
 
 /* Create a child instance of our structured logger */
 const log = createLogger(import.meta.url, true);
@@ -79,6 +80,7 @@ app.use(ENDPOINTS.HEALTH.BASE, healthCheckRoute);
 /* API Routes */
 app.use(ENDPOINTS.AUTH.BASE, authRoutes);
 app.use(ENDPOINTS.MESSAGES.BASE, messageRoutes);
+app.use(ENDPOINTS.CONTACTS.BASE, contactRoutes);
 
 /* In production, serve frontend from within our backend server */
 if (process.env.NODE_ENV === 'production') {

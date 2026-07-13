@@ -36,9 +36,17 @@ export const ENDPOINTS = {
   // Message endpoints
   MESSAGES: {
     BASE: '/api/messages',
-    CONTACTS: '/contacts',
     CHATS: '/chats',
     BY_USER_ID: '/:id',
     SEND_TO_ID: '/send/:id',
+  },
+
+  // Contact request endpoints — mutual accept required before two users can message each other
+  CONTACTS: {
+    BASE: '/api/contacts',
+    LIST: '/',
+    REQUESTS: '/requests',
+    ACCEPT: '/requests/:id/accept',
+    REMOVE: '/requests/:id',
   },
 } satisfies Record<string, EndpointGroup>;

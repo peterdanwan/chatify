@@ -7,12 +7,15 @@ import { safeErrorMessage } from '../lib/utils';
 import { useAuthStore } from './useAuthStore';
 
 export const useChatStore = create((set, get) => ({
-  allContacts: [],
+  contacts: [],
+  incomingRequests: [],
   chats: [],
   messages: [],
   activeTab: 'chats', // vs. "contacts"
   selectedUser: null,
-  isUserLoading: false, // used in ChatsList.jsx & ContactsList.jsx
+  isUsersLoading: false, // used in ChatsList.jsx & ContactsList.jsx
+  isLoadingRequests: false, // used in ContactsList.jsx for incoming requests
+  isSendingRequest: false, // used in ContactsList.jsx's add-by-username form
   isMessagesLoading: false, // used in ChatContainer.jsx
   nameFilter: '',
 
@@ -51,22 +54,83 @@ export const useChatStore = create((set, get) => ({
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 
-  getAllContacts: async () => {
-    set({ isUserLoading: true });
+  getContacts: async () => {
+    set({ isUsersLoading: true });
 
     try {
-      const res = await axiosInstance.get('/messages/contacts');
-      set({ allContacts: res.data });
+      const res = await axiosInstance.get('/contacts');
+      set({ contacts: res.data });
     } catch (error) {
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
     } finally {
-      set({ isUserLoading: false });
+      set({ isUsersLoading: false });
+    }
+  },
+
+  getIncomingRequests: async () => {
+    set({ isLoadingRequests: true });
+
+    try {
+      const res = await axiosInstance.get('/contacts/requests');
+      set({ incomingRequests: res.data });
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+    } finally {
+      set({ isLoadingRequests: false });
+    }
+  },
+
+  // Sends a contact request by username. Returns true/false so the add-by-username
+  // form knows whether to clear its input.
+  sendContactRequest: async (username) => {
+    set({ isSendingRequest: true });
+
+    try {
+      const res = await axiosInstance.post('/contacts/requests', { username });
+      toast.success(res.data.message);
+      // A mutual request collapses straight into an accepted contact — refresh the list.
+      if (res.data.status === 'accepted') {
+        get().getContacts();
+      }
+      return true;
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      set({ isSendingRequest: false });
+    }
+  },
+
+  acceptContactRequest: async (requestId) => {
+    try {
+      await axiosInstance.post(`/contacts/requests/${requestId}/accept`);
+      toast.success('Contact request accepted');
+      get().getIncomingRequests();
+      get().getContacts();
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
+    }
+  },
+
+  // Handles reject (incoming), cancel (outgoing), and unfriend (accepted) — all three
+  // just delete the relationship, so the backend and this action are shared across them.
+  removeContact: async (requestId) => {
+    try {
+      await axiosInstance.delete(`/contacts/requests/${requestId}`);
+      get().getIncomingRequests();
+      get().getContacts();
+    } catch (error) {
+      const errorMessage = safeErrorMessage(error);
+      toast.error(errorMessage);
     }
   },
 
   getMyChatPartners: async () => {
-    set({ isUserLoading: true });
+    set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get('/messages/chats');
       set({ chats: res.data });
@@ -74,7 +138,7 @@ export const useChatStore = create((set, get) => ({
       const errorMessage = safeErrorMessage(error);
       toast.error(errorMessage);
     } finally {
-      set({ isUserLoading: false });
+      set({ isUsersLoading: false });
     }
   },
 
@@ -117,6 +181,14 @@ export const useChatStore = create((set, get) => ({
       set({
         messages: get().messages.map((msg) => (msg._id === tempId ? res.data : msg)),
       });
+
+      // The server only emits 'newMessage' to the receiver, so the sender has to update
+      // their own Chats list locally — otherwise a brand-new conversation doesn't show up
+      // there until something else happens to trigger a refetch.
+      const currentChats = get().chats;
+      if (!currentChats.some((chat) => chat._id === selectedUser._id)) {
+        set({ chats: [selectedUser, ...currentChats] });
+      }
     } catch (error) {
       // Remove the optimistic message on error
       set({

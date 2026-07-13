@@ -8,30 +8,10 @@ import { Message } from '#models/Message.js';
 import { User } from '#models/User.js';
 import { validateBase64Image } from '#lib/utils.js';
 import { getReceiverSocketId, io } from '#lib/socket.js';
+import { areContacts } from '#controllers/contact.controller.js';
 
 const log = createLogger(import.meta.url);
-const { BASE, CONTACTS, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
-
-export const getAllContacts = async (req: Request, res: Response) => {
-  log.info(`'${BASE}${CONTACTS}' (GET) endpoint reached`);
-  try {
-    // .id return a string representation of _id (i.e., _id.toString())
-    //   e.g.: '507f1f77bcf86cd799439011'
-    // ._id return an ObjectId instance / whatever type specified for _id (this is the thing stored in MongoDB)
-    //   e.g.: ObjectId('507f1f77bcf86cd799439011')
-    const loggedInUserId = req.user!._id;
-    log.debug({ loggedInUserId }, 'loggedInUserId');
-
-    log.debug("Retrieving the logged-in user's contacts (without getting their passwords)");
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select('-password');
-
-    log.info({ filteredUsers }, 'Returning list of contacts');
-    res.status(200).json(filteredUsers);
-  } catch (error) {
-    log.error(error, 'Error in getAllContacts controller');
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const { BASE, CHATS, BY_USER_ID, SEND_TO_ID } = ENDPOINTS.MESSAGES;
 
 export const getChatPartners = async (req: Request, res: Response) => {
   log.info(`'${BASE}${CHATS}' (GET) endpoint reached`);
@@ -83,6 +63,11 @@ export const getMessagesByUserId = async (req: Request<{ id: string }>, res: Res
   const { id: userToChatId } = req.params;
 
   try {
+    if (!(await areContacts(myId, userToChatId))) {
+      log.warn({ myId, userToChatId }, 'Attempted to read messages with a non-contact');
+      return res.status(403).json({ message: 'You can only message accepted contacts.' });
+    }
+
     log.debug('Finding messages between sender and recipient');
     // Getting messages:
     // With regards to messages between people
@@ -125,11 +110,10 @@ export const sendMessage = async (req: Request<{ id: string }>, res: Response) =
       return res.status(400).json({ message: 'Cannot send messages to yourself.' });
     }
 
-    // Validate that the recipient of the message exists
-    const receiverExists = await User.exists({ _id: receiverId });
-    if (!receiverExists) {
-      log.warn(`No receiver with id: ${receiverId} exists`);
-      return res.status(404).json({ message: 'Receiver not found.' });
+    // Only allow messaging between accepted contacts — also implicitly confirms the receiver exists
+    if (!(await areContacts(senderId, receiverId))) {
+      log.warn({ senderId, receiverId }, 'Attempted to message a non-contact');
+      return res.status(403).json({ message: 'You can only message accepted contacts.' });
     }
 
     let imageUrl = '';
