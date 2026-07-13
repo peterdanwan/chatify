@@ -10,6 +10,7 @@ import NoConversationPlaceholder from '../components/NoConversationPlaceholder';
 import ProfileHeader from '../components/ProfileHeader';
 import { useChatStore } from '../store/useChatStore';
 import NameFilter from '../components/NameFilter';
+import AddContactForm from '../components/AddContactForm';
 
 function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
@@ -26,6 +27,8 @@ function ChatPage() {
         >
           <ProfileHeader />
           <ActiveTabSwitch />
+          {/* Vertical order of these two is controlled right here — swap them to reorder */}
+          {activeTab === 'contacts' && <AddContactForm />}
           <NameFilter activeTab={activeTab} />
 
           {/* Container that shows Chats or Contacts  */}
