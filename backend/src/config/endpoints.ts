@@ -22,6 +22,7 @@ export const ENDPOINTS = {
     LOGIN: '/login',
     LOGOUT: '/logout',
     UPDATE_PROFILE: '/update-profile',
+    ACCOUNT: '/account',
     PREFERENCES: '/preferences',
     // OAuth2 — initiation routes redirect the browser to the provider's login page
     GOOGLE: '/google',

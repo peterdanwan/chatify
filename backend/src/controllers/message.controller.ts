@@ -38,7 +38,7 @@ export const getChatPartners = async (req: Request, res: Response) => {
 
   try {
     const loggedInUserId = req.user!._id;
-    const loggedInUserName = `${req.user!.firstName} ${req.user!.lastName}`;
+    const loggedInUserName = req.user!.displayName;
 
     log.debug(`Getting chat partners for ${loggedInUserName} (User ID: ${loggedInUserId})`);
 

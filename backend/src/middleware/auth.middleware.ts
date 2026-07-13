@@ -29,9 +29,10 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
 
     log.debug({ userId: decoded.userId }, 'Checking if the user exists in the database');
 
-    // Ref: https://mongoosejs.com/docs/api/query.html#Query.prototype.select()
-    // - syntax: select('-<field_1> -<field_2>') to exclude
-    const user = await User.findById(decoded.userId).select('-password');
+    // Password is intentionally NOT excluded here — some routes (e.g. deleteUser, and
+    // toPublicUser's hasPassword flag) need to know whether one exists. It must never be
+    // sent in a response; every route that returns a user goes through toPublicUser for that.
+    const user = await User.findById(decoded.userId);
     if (!user) {
       log.warn({ userId: decoded.userId }, 'User from token not found in database');
       return res.status(404).json({ message: 'User not found' });
@@ -50,4 +51,15 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
     log.error(error, 'Error in protectRoute middleware');
     return res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+// Blocks chat features until a user has claimed a username (new OAuth accounts start without one).
+// Must run after protectRoute so req.user is populated. Account/profile/logout routes don't use
+// this gate — that would lock the user out of the one endpoint that lets them fix it.
+export const requireUsername = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user!.username) {
+    log.warn({ userId: req.user!._id }, 'Blocked request: username not yet claimed');
+    return res.status(403).json({ message: 'Choose a username before continuing' });
+  }
+  next();
 };

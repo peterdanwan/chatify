@@ -10,13 +10,14 @@ import {
   logout,
   deleteUser,
   updateProfile,
+  updateAccount,
   updatePreferences,
 } from '#controllers/auth.controller.js';
 
 import { protectRoute } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 import passport from '#config/passport.js';
-import { generateToken } from '#lib/utils.js';
+import { generateToken, toPublicUser } from '#lib/utils.js';
 
 const log = createLogger(import.meta.url);
 
@@ -26,6 +27,7 @@ const {
   LOGIN,
   LOGOUT,
   UPDATE_PROFILE,
+  ACCOUNT,
   DELETE_USER,
   PREFERENCES,
   CHECK,
@@ -84,7 +86,9 @@ router.get(FACEBOOK, passport.authenticate('facebook', { scope: ['email'] }));
 // On failure it redirects to CLIENT_URL with an error query param.
 function oauthSuccess(req: Request, res: Response) {
   generateToken(req.user!._id.toString(), res);
-  res.redirect(CLIENT_URL);
+  // New OAuth accounts have no username yet (OAuth profiles don't reliably provide one) —
+  // send them to claim one before they can use the app.
+  res.redirect(req.user!.username ? CLIENT_URL : `${CLIENT_URL}/choose-username`);
 }
 
 router.get(
@@ -125,8 +129,9 @@ router.get(
 router.use(protectRoute);
 router.put(PREFERENCES, updatePreferences);
 router.put(UPDATE_PROFILE, updateProfile);
+router.put(ACCOUNT, updateAccount);
 router.delete(DELETE_USER, deleteUser);
-router.get(CHECK, (req: Request, res: Response) => res.status(200).json(req.user));
+router.get(CHECK, (req: Request, res: Response) => res.status(200).json(toPublicUser(req.user!)));
 
 log.info('Initialized "auth" routes');
 

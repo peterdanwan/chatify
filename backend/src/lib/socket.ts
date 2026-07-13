@@ -34,9 +34,8 @@ const userSocketMap = new Map<string, Set<string>>();
 
 // 1. Detect when someone goes online
 io.on('connection', (socket: Socket) => {
-  const firstName: string = socket.user.firstName;
-  const lastName: string = socket.user.lastName;
-  log.info(`${firstName} ${lastName} connected`);
+  const displayName: string = socket.user.displayName;
+  log.info(`${displayName} connected`);
 
   const userId: string = socket.userId;
   const sockets: Set<string> = userSocketMap.get(userId) ?? new Set<string>();
@@ -49,7 +48,7 @@ io.on('connection', (socket: Socket) => {
   // 3. Detect when someone goes offline
   // - With socket.ion, we listen for events from clients
   socket.on('disconnect', () => {
-    log.info(`${firstName} ${lastName} disconnected`);
+    log.info(`${displayName} disconnected`);
     const sockets = userSocketMap.get(userId);
 
     if (sockets) {

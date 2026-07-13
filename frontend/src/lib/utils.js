@@ -15,7 +15,6 @@ export const safeErrorMessage = function (
 
 export function filterByName(users, nameFilter) {
   return users.filter((user) => {
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    return fullName.includes(nameFilter.toLowerCase());
+    return user.displayName.toLowerCase().includes(nameFilter.toLowerCase());
   });
 }

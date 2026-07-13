@@ -15,7 +15,8 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 const { LOG_LEVEL, USE_PRETTY } = process.env;
-const baseOptions = { level: LOG_LEVEL };
+// Falls back to 'info' so pino doesn't crash if LOG_LEVEL is unset (e.g. .env not loaded, as in tests)
+const baseOptions = { level: LOG_LEVEL || 'info' };
 
 function createPinoLogger(): pino.Logger<never, boolean> {
   if (USE_PRETTY === 'true') {

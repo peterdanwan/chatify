@@ -35,11 +35,16 @@ export const socketAuthMiddleware = async (socket: Socket, next: (err?: Error) =
       return next(new Error('User not found'));
     }
 
+    if (!user.username) {
+      log.warn({ userId: user._id }, 'Socket connection rejected: username not yet claimed');
+      return next(new Error('Choose a username before continuing'));
+    }
+
     // Attach user info to socket
     socket.user = user;
     socket.userId = user._id.toString();
 
-    log.info(`Socket authenticated for user: ${user.firstName} ${user.lastName} (${user._id})`);
+    log.info(`Socket authenticated for user: ${user.displayName} (${user._id})`);
     next();
   } catch (error) {
     log.error(

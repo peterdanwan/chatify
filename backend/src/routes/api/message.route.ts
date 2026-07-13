@@ -9,7 +9,7 @@ import {
   getMessagesByUserId,
   sendMessage,
 } from '#controllers/message.controller.js';
-import { protectRoute } from '#middleware/auth.middleware.js';
+import { protectRoute, requireUsername } from '#middleware/auth.middleware.js';
 import { arcjetProtection } from '#middleware/arcjet.middleware.js';
 
 const log = createLogger(import.meta.url);
@@ -22,7 +22,7 @@ const router = express.Router();
 // 2. Authentication protection...
 //
 // We have our router run both of these middlewares in this sequence (via router.use()) prior to any route-handling logic
-router.use(arcjetProtection, protectRoute);
+router.use(arcjetProtection, protectRoute, requireUsername);
 
 // Gets all contacts in our database (PW: why?)
 router.get(CONTACTS, getAllContacts);

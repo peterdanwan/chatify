@@ -44,14 +44,11 @@ async function findOrCreateUser(field: ProviderField, profile: OAuthProfile) {
     }
   }
 
-  // Step 3: new user — split displayName into firstName / lastName
-  const spaceIdx = profile.displayName?.indexOf(' ') ?? -1;
+  // Step 3: new user
   return User.create({
     [field]: profile.id,
     email: email ?? `${profile.id}@oauth.placeholder`,
-    firstName:
-      spaceIdx > 0 ? profile.displayName.slice(0, spaceIdx) : profile.displayName || 'User',
-    lastName: spaceIdx > 0 ? profile.displayName.slice(spaceIdx + 1) : '',
+    displayName: profile.displayName || 'User',
     profilePic: profile.photos?.[0]?.value ?? '',
   });
 }
