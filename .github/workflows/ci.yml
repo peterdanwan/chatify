@@ -2,8 +2,12 @@ name: CI
 
 # Runs on every push, to every branch — catches lint/format/type/test
 # regressions before they ever reach a PR or a tag.
+# Scoped to branches only: without this, a tag push (which also fires `push`)
+# would re-run CI against code a branch push had already just tested.
 on:
   push:
+    branches:
+      - '**'
 
 env:
   HUSKY: 0 # skip git-hook install; irrelevant on a CI runner
