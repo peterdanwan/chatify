@@ -33,8 +33,10 @@ const version = readVersion(root);
 run(`npm version ${version} --no-git-tag-version --allow-same-version`, path.join(root, 'backend'));
 run(`npm version ${version} --no-git-tag-version --allow-same-version`, path.join(root, 'frontend'));
 
+// npm version already updates each package-lock.json's version fields to match — just
+// need to make sure the commit actually captures them alongside their package.json.
 run(
-  'git add package.json backend/package.json frontend/package.json',
+  'git add package.json package-lock.json backend/package.json backend/package-lock.json frontend/package.json frontend/package-lock.json',
   root
 );
 run(`git commit -m "chore: release v${version}"`, root);
