@@ -43,7 +43,7 @@ function App() {
   return (
     <div
       id="app"
-      className="min-h-screen p-2 lg:p-4 bg-slate-900 relative flex items-center justify-center "
+      className="min-h-screen p-0 lg:p-4 bg-slate-900 relative flex items-center justify-center "
     >
       {/* DECORATORS - GRID BG & GLOW SHAPES in the corner (hidden on mobile) */}
       <div
