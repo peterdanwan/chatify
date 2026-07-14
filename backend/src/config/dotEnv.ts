@@ -200,7 +200,9 @@ const ENV_VARS = {
   // ============================================
   CLIENT_URL: {
     required: (env) => env.NODE_ENV === 'production',
-    description: 'Frontend application URL (used in emails and CORS configuration)',
+    description:
+      'Frontend application URL (used in emails, CORS configuration, and where the ' +
+      'browser is sent after a successful OAuth login — see passport.ts/auth.route.ts)',
     example: 'https://yourdomain.com',
     validate: (value) => {
       try {
@@ -208,6 +210,25 @@ const ENV_VARS = {
         return true;
       } catch {
         return 'CLIENT_URL must be a valid URL';
+      }
+    },
+  },
+  BACKEND_URL: {
+    // Optional in dev — passport.ts falls back to http://localhost:3000 if unset.
+    // Required in production: silently falling back to localhost there sends OAuth
+    // providers a redirect_uri that only resolves on someone's own machine, not the
+    // deployed server. This exact bug shipped once already.
+    required: (env) => env.NODE_ENV === 'production',
+    description:
+      "This server's own public URL — builds the OAuth callbackURL/redirect_uri sent " +
+      'to Google/GitHub/Facebook (see passport.ts)',
+    example: 'https://yourdomain.com',
+    validate: (value) => {
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return 'BACKEND_URL must be a valid URL';
       }
     },
   },
@@ -307,7 +328,11 @@ function validateEnv() {
   console.log(`   Environment: ${env.NODE_ENV}`);
   console.log(`   Database: ${dbType}`);
   console.log(`   Port: ${env.PORT}`);
-  console.log(`   Log Level: ${env.LOG_LEVEL}\n`);
+  console.log(`   Log Level: ${env.LOG_LEVEL}`);
+  // Printed explicitly because a wrong value here fails silently (no error, no crash) —
+  // OAuth just redirects somewhere unexpected. Check this line first if that happens again.
+  console.log(`   Backend URL: ${env.BACKEND_URL || 'http://localhost:3000 (default, unset)'}`);
+  console.log(`   Client URL: ${env.CLIENT_URL || '(unset)'}\n`);
 }
 
 // Run validation immediately

@@ -5,9 +5,10 @@ import FacebookIcon2 from './svg/FacebookIcon';
 import GoogleIcon from './svg/GoogleIcon';
 import GitHubIcon from './svg/GitHubIcon';
 
-// No Vite proxy is configured, so we hit the backend directly.
-// VITE_API_URL must be set in frontend/.env (e.g. VITE_API_URL=http://localhost:3000)
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Same dev/prod split as axios.js: in dev, frontend (5173) and backend (3000) are
+// separate origins, so this must be absolute. In production they're the same origin
+// (server.ts serves the built frontend), so a relative path resolves correctly on its own.
+const API_URL = import.meta.env.MODE === 'development' ? 'http://localhost:3000' : '';
 
 function ProviderButtons() {
   // OAuth2 is a browser-redirect flow, not a fetch/axios call.
