@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint --config eslint.config.js",
     "format": "prettier --write \"./src/**/*.{js,jsx}\"",
+    "format:check": "prettier --check \"./src/**/*.{js,jsx}\"",
     "preview": "vite preview"
   },
   "lint-staged": {

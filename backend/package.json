@@ -7,6 +7,7 @@
     "dev": "tsx watch ./src/server.js",
     "sdev": "tsx watch --clear-screen=false ./src/server.js",
     "format": "prettier --write \"./src/**/*.{js,ts}\"",
+    "format:check": "prettier --check \"./src/**/*.{js,ts}\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --config eslint.config.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
