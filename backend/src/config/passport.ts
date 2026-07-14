@@ -87,16 +87,21 @@ passport.use(
 // ─── GitHub ───────────────────────────────────────────────────────────────────
 // Requires: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET in .env
 // Callback registered at: github.com → Settings → Developer settings → OAuth Apps
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      callbackURL: `${BACKEND_URL}/api/auth/github/callback`,
-    },
-    makeVerify('githubId')
-  )
+const githubStrategy = new GitHubStrategy(
+  {
+    clientID: process.env.GITHUB_CLIENT_ID!,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    callbackURL: `${BACKEND_URL}/api/auth/github/callback`,
+  },
+  makeVerify('githubId')
 );
+// Unlike Google's strategy, passport-github2 doesn't forward the `prompt` authenticate()
+// option to GitHub's /authorize URL — GitHub added `prompt=select_account` support (2024)
+// but this library predates it, so it has to be added here by hand.
+(
+  githubStrategy as unknown as { authorizationParams: (options: { prompt?: string }) => object }
+).authorizationParams = (options) => (options.prompt ? { prompt: options.prompt } : {});
+passport.use(githubStrategy);
 
 // ─── Facebook ─────────────────────────────────────────────────────────────────
 // Requires: FACEBOOK_APP_ID, FACEBOOK_APP_SECRET in .env

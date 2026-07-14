@@ -76,8 +76,17 @@ router.post(LOGOUT, logout);
 // INITIATION routes: browser navigates here → passport redirects to the provider's login page.
 // No JSON is returned; it's a 302 redirect (that's why the frontend uses window.location.href,
 // not fetch/axios).
-router.get(GOOGLE, passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get(GITHUB, passport.authenticate('github', { scope: ['user:email'] }));
+// prompt: 'select_account' forces the account chooser every time, even if this browser
+// already granted consent — without it, a returning provider session silently reuses
+// whichever account was used last, with no way to pick a different one mid-flow.
+router.get(
+  GOOGLE,
+  passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' })
+);
+router.get(
+  GITHUB,
+  passport.authenticate('github', { scope: ['user:email'], prompt: 'select_account' })
+);
 router.get(FACEBOOK, passport.authenticate('facebook', { scope: ['email'] }));
 
 // CALLBACK routes: provider redirects back here with an auth code.
