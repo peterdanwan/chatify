@@ -15,7 +15,7 @@
     "format:check": "npm run format:check -C backend && npm run format:check -C frontend",
     "typecheck": "npm run typecheck -C backend",
     "test": "npm test -C backend",
-    "build": "npm i && npm i -C backend && npm i -C frontend && npm run build -C frontend",
+    "build": "npm i && npm i -C backend && npm i -C frontend && npm run build -C backend && npm run build -C frontend",
     "release": "node ./_scripts/node/release.js",
     "start": "npm run start -C backend",
     "docker:build": "docker build -f Dockerfile -t chatify .",

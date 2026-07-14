@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "types": ["node", "jest"],
+    "customConditions": ["development"],
     "rootDir": "./src",
     "outDir": "./dist",
   },

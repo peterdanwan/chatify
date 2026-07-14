@@ -4,27 +4,49 @@
   "description": "Chatify Backend",
   "main": "server.js",
   "scripts": {
-    "dev": "tsx watch ./src/server.js",
-    "sdev": "tsx watch --clear-screen=false ./src/server.js",
+    "dev": "tsx watch --conditions=development ./src/server.ts",
+    "sdev": "tsx watch --clear-screen=false --conditions=development ./src/server.ts",
     "format": "prettier --write \"./src/**/*.{js,ts}\"",
     "format:check": "prettier --check \"./src/**/*.{js,ts}\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --config eslint.config.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "start": "node ./src/server.js"
+    "build": "tsc",
+    "start": "node ./dist/server.js"
   },
   "keywords": [],
   "author": "Peter Wan",
   "license": "ISC",
   "type": "module",
   "imports": {
-    "#controllers/*": "./src/controllers/*",
-    "#config/*": "./src/config/*",
-    "#routes/*": "./src/routes/*",
-    "#lib/*": "./src/lib/*",
-    "#models/*": "./src/models/*",
-    "#emails/*": "./src/emails/*",
-    "#middleware/*": "./src/middleware/*"
+    "#controllers/*": {
+      "development": "./src/controllers/*",
+      "default": "./dist/controllers/*"
+    },
+    "#config/*": {
+      "development": "./src/config/*",
+      "default": "./dist/config/*"
+    },
+    "#routes/*": {
+      "development": "./src/routes/*",
+      "default": "./dist/routes/*"
+    },
+    "#lib/*": {
+      "development": "./src/lib/*",
+      "default": "./dist/lib/*"
+    },
+    "#models/*": {
+      "development": "./src/models/*",
+      "default": "./dist/models/*"
+    },
+    "#emails/*": {
+      "development": "./src/emails/*",
+      "default": "./dist/emails/*"
+    },
+    "#middleware/*": {
+      "development": "./src/middleware/*",
+      "default": "./dist/middleware/*"
+    }
   },
   "lint-staged": {
     "src/**/*.{js,ts}": [
