@@ -1,7 +1,9 @@
 // _scripts/node/release.js
 // Bumps root/backend/frontend package.json to the same version, commits, and tags.
 // Usage: npm run release -- <patch|minor|major>
-// Then:  git push --follow-tags   (the pushed tag is what triggers CD)
+// Then:  git push origin main v<version>   (the pushed tag is what triggers CD)
+// NOTE: `npm version` creates a lightweight tag, not annotated — `git push --follow-tags`
+// silently skips lightweight tags, so the tag must be pushed by explicit name.
 
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
@@ -42,4 +44,4 @@ run(
 run(`git commit -m "chore: release v${version}"`, root);
 run(`git tag v${version}`, root);
 
-console.log(`\nTagged v${version}. Push it to trigger a deploy:\n  git push --follow-tags`);
+console.log(`\nTagged v${version}. Push it to trigger a deploy:\n  git push origin main v${version}`);
