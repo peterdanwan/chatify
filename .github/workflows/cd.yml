@@ -1,0 +1,21 @@
+name: CD
+
+# Deploys only on a version tag push (e.g. v1.2.3) — never on a plain branch
+# push. Create one with: npm run release -- <patch|minor|major>, then
+# git push --follow-tags.
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: sevalla-hosting/sevalla-deploy@v2.0.0
+        with:
+          action: deploy-app
+          sevalla-token: ${{ secrets.SEVALLA_TOKEN }}
+          app-id: ${{ secrets.SEVALLA_APP_ID }}
+          branch: main
+          wait-for-finish: true
