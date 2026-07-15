@@ -12,6 +12,8 @@ import { useAuthStore } from './store/useAuthStore';
 import GlowBlob from './components/GlowBlob';
 import DeleteUserPage from './pages/DeleteUserPage';
 import ChooseUsernamePage from './pages/ChooseUsernamePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import DataDeletionPage from './pages/DataDeletionPage';
 
 function App() {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -54,6 +56,9 @@ function App() {
       <GlowBlob position="top-left" backgroundColour="bg-pink-500" />
       <GlowBlob position="bottom-right" backgroundColour="bg-cyan-500" />
       <Routes>
+        {/* Public regardless of auth state — linked from Google/Facebook app settings */}
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/data-deletion" element={<DataDeletionPage />} />
         {needsUsername ? (
           <>
             <Route path="/choose-username" element={<ChooseUsernamePage />} />
